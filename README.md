@@ -1,4 +1,4 @@
-# Regenerative-Cooling-Rocket-Engine
+# Regenerative-Cooling-Rocket-Engine-Calculation
 This program will calculate regenerative cooling rocket engine specification.
 
 Works only in unix environment.
