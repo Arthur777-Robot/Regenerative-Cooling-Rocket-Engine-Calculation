@@ -1,0 +1,13 @@
+prob
+rocket equilibrium frozen nfz=2
+o/f 2.100000
+p,bar 16.000000
+pip 16.000000
+reac
+ fuel C2H5OH(L) wt%=100 t,k=298.15
+ oxid O2(L) wt%=100 t,k=90.17
+output transport
+output short
+output trace=1e-5
+plot p pi/p o/f isp ivac aeat cf t
+end

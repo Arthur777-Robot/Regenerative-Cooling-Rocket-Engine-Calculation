@@ -1,0 +1,14 @@
+prob case=test6679 ro equilibrium 
+
+ ! iac problem
+o/f 2.1
+p,bar  10
+pip 10.0
+reac
+ fuel  C2H5OH(L) wt%=100 t,k=298.15
+  oxid  O2(L) wt%=100. t,k=90.17
+output    short
+output trace=1e-5
+plot  
+ p t Ivac cp isp
+end
