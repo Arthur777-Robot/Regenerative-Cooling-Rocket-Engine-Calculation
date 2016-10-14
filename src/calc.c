@@ -18,6 +18,8 @@ static float Vc,Dc,Lc,Ct;
 static float mt,mf, mo;
 //mt: total fuel mass, mf:fuel mass, mo:mass lox
 
+static float hg,rg,hf,rf,hm,rm,rt;
+
 void calc_chamber_spec(void){
 
 	calc_nozzle();
@@ -101,18 +103,64 @@ void calc_regene(void){
 }
 
 // using bartz
+// needs to be modified for geometrical change in chamber
 void calc_gas_heat_stansfer_coeff(void){
-	float bartz1,bartz2,bartz3,bartz4,bartz5;
+	int i = 0;
+	float bartz[6];
+	hg = 1;
 
-	bartz1 = 0.026 / pow(convert_to(m,Dt),0.2);
-	bartz2 = pow(CEA[chamber].Visc_gas,0.2) * CEA[chamber].Cp * 1000
-				/ pow(CEA[chamber].Prandtl_gas,0.6); // Cp transforms to J
-	printf("bartz1 = %f\n",bartz1);
-	printf("bartz2 = %f\n",bartz2);
+	bartz[0] = 0.026 / pow(convert_to(m,Dt),0.2);
+	bartz[1] = pow(CEA[chamber].Visc_gas/10000,0.2) * CEA[chamber].Cp * 1000
+				/ pow(CEA[chamber].Prandtl_gas,0.6); 
+				//visc changed from mmpoise to kgm/sec, Cp transforms to J
+	bartz[2] = pow(convert_to(Pa,PC) / CEA[nozzle_exit].Cstar,0.8);
+	bartz[3] = pow(Dt / (1.5 * Dt / 2),0.1);	//if the nozzle are conical
+	bartz[4] = pow(At / Ac,0.9); //change here for geometrical parameter.
+
+	
+	for(i = 0; i < 5; i++){
+		hg *= bartz[i];
+//		printf("bartz%d = %f\n",i,bartz[i]);
+	}
+
+	rg = 1 / hg;
+	printf("hg = %f[W/m^2K]\n",hg);
+	printf("rg = %f[m^2K/W]\n",rg);
 }
 
 
 void calc_fuel_heat_stansfer_coeff(void){
+	float path_width,path_height,path_area,path_num,hydraulic_diam;
+	char temp1[64],temp2[64];
+
+	while(1){
+		printf("input fuel path dimention for cooling\n");
+		printf("path width [mm] = ");
+		scanf("%s",temp1);
+		printf("path height[mm] = ");
+		scanf("%s",temp2);
+
+		path_width = atof(temp1);
+		path_height = atof(temp2);
+		
+		path_area = path_width * path_height;
+		//this hydraulic diameter is only for square type path
+		hydraulic_diam = 2 * path_area / ( path_width + path_height);
+
+		printf("path area = %f\n",path_area);
+		printf("hydraulic diameter = %f\n",hydraulic_diam);
+
+		printf("if you are satisfied, type ok\n");
+		scanf("%s",temp1);
+
+		if(strcmp(temp1,"ok") == 0){
+			break;	
+		}
+	}
+
+
+
+	
 
 }
 

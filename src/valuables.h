@@ -15,6 +15,9 @@
 #define L_STAR 1.4		//[m]
 #define TENSILE_STRENGTH 150 //[N/mm^2] 150[N/mm^2] Cu@250deg_c
 #define SAFETY_COEFF 2.5
+#define CP_F 2093 		//Fuel thermal capacity [J/kgK] 
+#define VISC_F 0.00074291		//fuel viscocity at high temp [Kgm/sec] 1/10000 from mmpoise
+#define THRM_COND 0.133		// fuel thermal conductivity at high temp [W/mK]
 
 typedef struct{
 	float Tc;		//Chamber Temp[K]
