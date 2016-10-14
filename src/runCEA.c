@@ -46,30 +46,19 @@ void run_CEA(void){
 	pclose(fp);
 }
 
-//equilibrium and frozen option must be written
+//hate this code. please someone rewite this with smart brain.
 void get_CEA_param(void){
 
 	char temp1[256],temp2[1];
 	FILE *fp;
 
-	char s[8][10] = {"T, K","Cp, KJ","VISC","PRANDTL","Ae/At","CSTAR","CF","Isp"};
-	int i = 0;
+	char s[10][12] = {"T, K","VISC","Cp, KJ","PRANDTL","Cp, KJ","PRANDTL","Ae/At","CSTAR","CF","Isp"};
+	int i = 0, j = 0;
 	char split[] = " \n";
 	char *addr1,*addr2;
 
-	while(1){
-		printf("calculate with frozen or equilibrium option\n if frozen, enter f. if equilibrium, enter e\n");
-		scanf("%c",temp2);
-
-		if(temp2[0] == 'f'){
-			printf("calculate with frozen option\n");
-			break;
-		}else if(temp2[0] == 'e'){
-			printf("calculate with equilibrium option\n");
-			break;
-		}
-
-	}
+	float cp1[3],cp2[3];
+	float pr1[3],pr2[3];
 
 	if((fp = fopen("fuel.out","r")) == NULL){
 		printf("error reading fuel.out file\n");
@@ -83,83 +72,133 @@ void get_CEA_param(void){
 //				printf("%s\n",addr2);
 //				addr2 = strtok(NULL,split);
 				if(i == 0){
-					printf("Tc\n");
 					CEA[0].Tc = atof(addr2);
-					printf("%f\n",CEA[0].Tc);
 					CEA[1].Tc = atof(strtok(NULL,split));
-					printf("%f\n",CEA[1].Tc);
 					CEA[2].Tc = atof(strtok(NULL,split));
-					printf("%f\n",CEA[2].Tc);
+
+					printf("Tc\n");
+					for(j = 0;j < 3; j++){
+						printf("%f\n",CEA[j].Tc);
+					}
 					break;
 				}else if(i == 1){
-					printf("Cp\n");
-					CEA[0].Cp = atof(addr2);
-					printf("%f\n",CEA[0].Cp);
-					CEA[1].Cp = atof(strtok(NULL,split));
-					printf("%f\n",CEA[1].Cp);
-					CEA[2].Cp = atof(strtok(NULL,split));
-					printf("%f\n",CEA[2].Cp);
-					i--;
+					CEA[0].Visc_gas = atof(addr2);
+					CEA[1].Visc_gas = atof(strtok(NULL,split));
+					CEA[2].Visc_gas = atof(strtok(NULL,split));
+
+					printf("Visc_gas\n");
+					for(j = 0;j < 3; j++){
+						printf("%f\n",CEA[j].Visc_gas);
+					}
 					break;
 				}else if(i == 2){
-					printf("Visc_gas\n");
-					CEA[0].Visc_gas = atof(addr2);
-					printf("%f\n",CEA[0].Visc_gas);
-					CEA[1].Tc = atof(strtok(NULL,split));
-					printf("%f\n",CEA[1].Visc_gas);
-					CEA[2].Tc = atof(strtok(NULL,split));
-					printf("%f\n",CEA[2].Visc_gas);
+					cp1[0]= atof(addr2);
+					cp1[1]= atof(strtok(NULL,split));
+					cp1[2] = atof(strtok(NULL,split));
+
+					printf("Equilibrium Cp\n");
+					for(j = 0;j < 3; j++){
+						printf("%f\n",cp1[j]);
+					}
 					break;
 				}else if(i == 3){
-					printf("Prandtl_gas\n");
-					CEA[0].Prandtl_gas = atof(addr2);
-					printf("%f\n",CEA[0].Prandtl_gas);
-					CEA[1].Prandtl_gas = atof(strtok(NULL,split));
-					printf("%f\n",CEA[1].Prandtl_gas);
-					CEA[2].Prandtl_gas = atof(strtok(NULL,split));
-					printf("%f\n",CEA[2].Prandtl_gas);
+					pr1[0] = atof(addr2);
+					pr1[1] = atof(strtok(NULL,split));
+					pr1[2] = atof(strtok(NULL,split));
+
+					printf("Equilibrium Prandtl_gas\n");
+					for(j = 0;j < 3; j++){
+						printf("%f\n",pr1[j]);
+					}
 					break;
 				}else if(i == 4){
-					printf("AeAt\n");
-					CEA[0].AeAt = 0;
-					printf("%f\n",CEA[0].AeAt);
-					CEA[1].AeAt = atof(addr2);
-					printf("%f\n",CEA[1].AeAt);
-					CEA[2].AeAt = atof(strtok(NULL,split));
-					printf("%f\n",CEA[2].AeAt);
+					cp2[0] = atof(addr2);
+					cp2[1] = atof(strtok(NULL,split));
+					cp2[2] = atof(strtok(NULL,split));
+
+					printf("Frozen Cp\n");
+					for(j = 0;j < 3; j++){
+						printf("%f\n",cp2[j]);
+					}
 					break;
 				}else if(i == 5){
-					printf("Cstar\n");
-					CEA[0].Cstar = 0;
-					printf("%f\n",CEA[0].Cstar);
-					CEA[1].Cstar = atof(addr2);
-					printf("%f\n",CEA[1].Cstar);
-					CEA[2].Cstar = atof(strtok(NULL,split));
-					printf("%f\n",CEA[2].Cstar);
+					pr2[0] = atof(addr2);
+					pr2[1] = atof(strtok(NULL,split));
+					pr2[2] = atof(strtok(NULL,split));
+
+					printf("Frozen Prandtl_gas\n");
+					for(j = 0;j < 3; j++){
+						printf("%f\n",pr2[j]);
+					}
 					break;
 				}else if(i == 6){
-					printf("Cf\n");
-					CEA[0].Cf = 0;
-					printf("%f\n",CEA[0].Cf);
-					CEA[1].Cf = atof(addr2);
-					printf("%f\n",CEA[1].Cf);
-					CEA[2].Cf = atof(strtok(NULL,split));
-					printf("%f\n",CEA[2].Cf);
+					CEA[0].AeAt = 0;
+					CEA[1].AeAt = atof(addr2);
+					CEA[2].AeAt = atof(strtok(NULL,split));
+
+					printf("AeAt\n");
+					for(j = 0;j < 3; j++){
+						printf("%f\n",CEA[j].AeAt);
+					}
 					break;
 				}else if(i == 7){
-					printf("ISP\n");
+					CEA[0].Cstar = 0;
+					CEA[1].Cstar = atof(addr2);
+					CEA[2].Cstar = atof(strtok(NULL,split));
+
+					printf("Cstar\n");
+					for(j = 0;j < 3; j++){
+						printf("%f\n",CEA[j].Cstar);
+					}
+					break;
+				}else if(i == 8){
+					CEA[0].Cf = 0;
+					CEA[1].Cf = atof(addr2);
+					CEA[2].Cf = atof(strtok(NULL,split));
+
+					printf("Cf\n");
+					for(j = 0;j < 3; j++){
+						printf("%f\n",CEA[j].Cf);
+					}
+					break;
+				}else if(i == 9){
 					CEA[0].Isp = 0;
-					printf("%f\n",CEA[0].Isp);
 					CEA[1].Isp = atof(addr2);
-					printf("%f\n",CEA[1].Isp);
 					CEA[2].Isp = atof(strtok(NULL,split));
-					printf("%f\n",CEA[2].Isp);
+
+					printf("ISP\n");
+					for(j = 0;j < 3; j++){
+						printf("%f\n",CEA[j].Isp);
+					}
 					break;
 				}
 			}
-			if(i > 7) break;
+			if(i > 9) break;
 			i++;
 		}
+	}
+	while(1){
+		printf("calculate with frozen or equilibrium option\n if frozen, enter f. if equilibrium, enter e\n");
+		scanf("%c",temp2);
+
+		if(temp2[0] == 'f'){
+			printf("calculate with frozen option\n");
+			for(i = 0; i < 3; i++){
+				CEA[i].Cp = cp2[i];
+				CEA[i].Prandtl_gas = pr2[i];
+			}
+			break;
+		}else if(temp2[0] == 'e'){
+			printf("calculate with equilibrium option\n");
+			for(i = 0; i < 3; i++){
+				CEA[i].Cp = cp1[i];
+				CEA[i].Prandtl_gas = pr1[i];
+			}
+			break;
+		}else{
+			printf("error, please type f or e");
+		}
+
 	}
 }
 

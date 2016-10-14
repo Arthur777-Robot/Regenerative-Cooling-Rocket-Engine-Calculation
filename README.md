@@ -9,3 +9,10 @@ FCEA2 command must be pathed.
 If you are Japanese, this website will describe how to install CEA to MACOS.
 
 It is still under developement.
+
+
+# How to use
+1: compile the project using "make"
+2: run the program by typing ./regene
+
+
