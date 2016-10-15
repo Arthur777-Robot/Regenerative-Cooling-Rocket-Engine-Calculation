@@ -4,7 +4,7 @@ o/f 2.100000
 p,bar 16.000000
 pip 16.000000
 reac
- fuel C2H5OH(L) wt%=100 t,k=298.15
+ fuel C10H21,n-decyl wt%=100 t,k=298.15
  oxid O2(L) wt%=100 t,k=90.17
 output transport
 output short

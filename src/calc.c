@@ -12,13 +12,15 @@ extern T_CEA CEA[3]; // parameter for chamber, throat, exit
 //global valuables just in this file
 static float At,Dt,Ae,De,Ln,Ac;
 //At: throat area, Dt:throat Diam, Ae: exit area, De: exit diameter, Ln: nozzle length, Ac:chamber area
-static float Vc,Dc,Lc,Ct;
+static float Vc,Dc,Lc,Ct,vf;
 //Vc: chamber volume, Rc:chamber radius, Lc:chamber length, Ct:chamber thickness
 
 static float mt,mf, mo;
 //mt: total fuel mass, mf:fuel mass, mo:mass lox
 
-static float hg,rg,hf,rf,hm,rm,rt;
+static float hg,rg,hf,rf,hm,rm,rc,rt;	//rc for carbon heat resist
+
+static float Q, Tcw,Tf_out;
 
 void calc_chamber_spec(void){
 
@@ -124,14 +126,16 @@ void calc_gas_heat_stansfer_coeff(void){
 	}
 
 	rg = 1 / hg;
-	printf("hg = %f[W/m^2K]\n",hg);
-	printf("rg = %f[m^2K/W]\n",rg);
+	printf("gas heat conductivity = %f[W/m^2K]\n",hg);
+	printf("gas heat resistance  = %f[m^2K/W]\n",rg);
 }
 
 
-void calc_fuel_heat_stansfer_coeff(void){
+void calc_fuel_heat_stansfer_coeff(void){ //helical coil type
 	float path_width,path_height,path_area,path_num,hydraulic_diam;
-	char temp1[64],temp2[64];
+	float nyuf,delta_p;
+	float Re,Pr,Nu;
+	char temp1[64],temp2[64],temp3[64];
 
 	while(1){
 		printf("input fuel path dimention for cooling\n");
@@ -139,16 +143,24 @@ void calc_fuel_heat_stansfer_coeff(void){
 		scanf("%s",temp1);
 		printf("path height[mm] = ");
 		scanf("%s",temp2);
+		printf("number of channel = ");
+		scanf("%s",temp3);
 
 		path_width = atof(temp1);
 		path_height = atof(temp2);
+		path_num = atof(temp3);
 		
 		path_area = path_width * path_height;
 		//this hydraulic diameter is only for square type path
 		hydraulic_diam = 2 * path_area / ( path_width + path_height);
+		vf = mf / DENSITY_FUEL / 1000 / convert_to(m2,path_area) / path_num;
 
-		printf("path area = %f\n",path_area);
-		printf("hydraulic diameter = %f\n",hydraulic_diam);
+		delta_p = 0.5 * DENSITY_FUEL * 1000 * pow(vf,2);
+
+		printf("path area = %f[mm^2]\n",path_area);
+		printf("hydraulic diameter = %f[mm]\n",hydraulic_diam);
+		printf("fuel velocity in cooling channel = %f[m/sec]\n",vf);
+		printf("channel pressure drop = %f[MPa]\n",convert_to(MPa,delta_p));
 
 		printf("if you are satisfied, type ok\n");
 		scanf("%s",temp1);
@@ -158,21 +170,62 @@ void calc_fuel_heat_stansfer_coeff(void){
 		}
 	}
 
+	nyuf = VISC_F / DENSITY_FUEL / 1000;
+	Re = vf * convert_to(m,hydraulic_diam) / nyuf ;
+	Pr = VISC_F * CP_F / THRM_COND_FUEL;
+	Nu = 0.023 * pow(Re,0.8) * pow(Pr,0.6);
 
+	hf = Nu * THRM_COND_FUEL / convert_to(m,hydraulic_diam);
+	rf = 1 / hf; 
 
+	printf("Coefficient of kinematic viscosity = %e\n",nyuf);
+	printf("Reynolds number of liquid = %f\n",Re);
+	printf("Prandtle number of liquid = %f\n",Pr);
+	printf("Nusselt number of liquid = %f\n",Nu);
+	printf("hf = %f[W/m^2K]\n",hf);
+	printf("rf = %e[m^2K/W]\n",rf);
 	
-
 }
 
 void calc_metal_heat_stansfer_coeff(void){
 
+	hm = THRM_COND_METAL;
+	rm = convert_to(m,Ct) / hm;
+
+	printf("chamber material heat conductivity = %f\n",hm);
+	printf("chamber material heat resistance = %e\n",rm);
+
 }
 
 void calc_total_heat_stansfer_coeff(void){
+	float Tcwc;
+
+	rc = 0.000407663;	//carbon heat resistivity
+
+	rt = rg + rf + rm + rc;
+	Q = (CEA[chamber].Tc - 298) / rt;
+	Tcw = CEA[chamber].Tc - Q * (rg + rc);
+	Tcwc = CEA[chamber].Tc - Q * (rg + rc + rm);
+
+	printf("total heat resistance = %f[m^2K/W]\n",rt);
+	printf("total heat transfer = %f[MW/m^2]\n",Q/1000000);
+	printf("chamber wall temp = %f[deg_c]\n",convert_to(deg_c,Tcw));
+	printf("chamber wall channel temp = %f[deg_c]\n",convert_to(deg_c,Tcwc));
+	printf("check = %f[K]\n",CEA[chamber].Tc - Q * (rt));
 
 }
 
 void calc_delta_fuel_temp(void){
+	float A_ct;		//Chamber total area
+
+	A_ct = M_PI * (Dc + 2 * Ct) * Lc;
+	A_ct = A_ct * 1.2;		//nozzle are typically 10% of chamber
+
+	Tf_out = convert_to(m2,A_ct) * Q / (vf * CP_F);
+
+	printf("Chamber area total = %f[mm^2]\n",convert_to(m2,A_ct));
+	printf("total heat to wall = %f[W]\n",convert_to(m2,A_ct*Q));
+	printf("Fuel delta temp = %f[deg_c]\n",Tf_out);
 
 }
 

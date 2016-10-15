@@ -76,100 +76,100 @@ void get_CEA_param(void){
 					CEA[1].Tc = atof(strtok(NULL,split));
 					CEA[2].Tc = atof(strtok(NULL,split));
 
-					printf("Tc\n");
-					for(j = 0;j < 3; j++){
-						printf("%f\n",CEA[j].Tc);
-					}
+//					printf("Tc\n");
+//					for(j = 0;j < 3; j++){
+//						printf("%f\n",CEA[j].Tc);
+//					}
 					break;
 				}else if(i == 1){
 					CEA[0].Visc_gas = atof(addr2);
 					CEA[1].Visc_gas = atof(strtok(NULL,split));
 					CEA[2].Visc_gas = atof(strtok(NULL,split));
 
-					printf("Visc_gas\n");
-					for(j = 0;j < 3; j++){
-						printf("%f\n",CEA[j].Visc_gas);
-					}
+//					printf("Visc_gas\n");
+//					for(j = 0;j < 3; j++){
+//						printf("%f\n",CEA[j].Visc_gas);
+//					}
 					break;
 				}else if(i == 2){
 					cp1[0]= atof(addr2);
 					cp1[1]= atof(strtok(NULL,split));
 					cp1[2] = atof(strtok(NULL,split));
 
-					printf("Equilibrium Cp\n");
-					for(j = 0;j < 3; j++){
-						printf("%f\n",cp1[j]);
-					}
+//					printf("Equilibrium Cp\n");
+//					for(j = 0;j < 3; j++){
+//						printf("%f\n",cp1[j]);
+//					}
 					break;
 				}else if(i == 3){
 					pr1[0] = atof(addr2);
 					pr1[1] = atof(strtok(NULL,split));
 					pr1[2] = atof(strtok(NULL,split));
 
-					printf("Equilibrium Prandtl_gas\n");
-					for(j = 0;j < 3; j++){
-						printf("%f\n",pr1[j]);
-					}
+//					printf("Equilibrium Prandtl_gas\n");
+//					for(j = 0;j < 3; j++){
+//						printf("%f\n",pr1[j]);
+//					}
 					break;
 				}else if(i == 4){
 					cp2[0] = atof(addr2);
 					cp2[1] = atof(strtok(NULL,split));
 					cp2[2] = atof(strtok(NULL,split));
 
-					printf("Frozen Cp\n");
-					for(j = 0;j < 3; j++){
-						printf("%f\n",cp2[j]);
-					}
+//					printf("Frozen Cp\n");
+//					for(j = 0;j < 3; j++){
+//						printf("%f\n",cp2[j]);
+//					}
 					break;
 				}else if(i == 5){
 					pr2[0] = atof(addr2);
 					pr2[1] = atof(strtok(NULL,split));
 					pr2[2] = atof(strtok(NULL,split));
 
-					printf("Frozen Prandtl_gas\n");
-					for(j = 0;j < 3; j++){
-						printf("%f\n",pr2[j]);
-					}
+//					printf("Frozen Prandtl_gas\n");
+//					for(j = 0;j < 3; j++){
+//						printf("%f\n",pr2[j]);
+//					}
 					break;
 				}else if(i == 6){
 					CEA[0].AeAt = 0;
 					CEA[1].AeAt = atof(addr2);
 					CEA[2].AeAt = atof(strtok(NULL,split));
 
-					printf("AeAt\n");
-					for(j = 0;j < 3; j++){
-						printf("%f\n",CEA[j].AeAt);
-					}
+//					printf("AeAt\n");
+//					for(j = 0;j < 3; j++){
+//						printf("%f\n",CEA[j].AeAt);
+//					}
 					break;
 				}else if(i == 7){
 					CEA[0].Cstar = 0;
 					CEA[1].Cstar = atof(addr2);
 					CEA[2].Cstar = atof(strtok(NULL,split));
 
-					printf("Cstar\n");
-					for(j = 0;j < 3; j++){
-						printf("%f\n",CEA[j].Cstar);
-					}
+//					printf("Cstar\n");
+//					for(j = 0;j < 3; j++){
+//						printf("%f\n",CEA[j].Cstar);
+//					}
 					break;
 				}else if(i == 8){
 					CEA[0].Cf = 0;
 					CEA[1].Cf = atof(addr2);
 					CEA[2].Cf = atof(strtok(NULL,split));
 
-					printf("Cf\n");
-					for(j = 0;j < 3; j++){
-						printf("%f\n",CEA[j].Cf);
-					}
+//					printf("Cf\n");
+//					for(j = 0;j < 3; j++){
+//						printf("%f\n",CEA[j].Cf);
+//					}
 					break;
 				}else if(i == 9){
 					CEA[0].Isp = 0;
 					CEA[1].Isp = atof(addr2);
 					CEA[2].Isp = atof(strtok(NULL,split));
 
-					printf("ISP\n");
-					for(j = 0;j < 3; j++){
-						printf("%f\n",CEA[j].Isp);
-					}
+//					printf("ISP\n");
+//					for(j = 0;j < 3; j++){
+//						printf("%f\n",CEA[j].Isp);
+//					}
 					break;
 				}
 			}
