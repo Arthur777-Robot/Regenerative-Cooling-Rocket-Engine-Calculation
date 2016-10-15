@@ -12,9 +12,9 @@ It is still under developement.
 
 
 # How to use
-1: compile the project using "make"
+1: Change the valuables in "valuables.h" to your desired parameter
 
-2: Change the valuables in "valuables.h" to your desired parameter
+2: compile the project using "make"
 
 3: run the program by typing ./regene
 
