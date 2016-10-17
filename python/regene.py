@@ -15,6 +15,7 @@ from matplotlib.font_manager import FontProperties
 import xlrd
 import csv
 import pandas as pd
+import pprint
 
 if 'Windows' == platform.system():
     font_prop = FontProperties(fname=r'C:\WINDOWS\Fonts\MSGothic.ttf')
@@ -49,6 +50,10 @@ class Parameter():
         self.visc_fuel = self.df.data[u"燃料粘性係数"]
         self.thermal_conductivity_fuel = self.df.data[u"燃料熱伝導率"]
         self.thermal_conductivity_metal = self.df.data[u"金属熱伝導率"]
+
+    def __repr__(self):
+        pp = pprint.PrettyPrinter(indent=4)
+        return str(pp.pprint(self.__dict__))
 
     def run_CEA(self):
         file_name = '00temp' # 一時的に作られるファイル
@@ -164,8 +169,8 @@ class Parameter():
     def calc_gas_heat_stansfer_coef(self):
         bartz = np.zeros(5)
         bartz[0] = 0.026 * (self.Dt/1000) ** 0.2
-        bartz[1] = ((self.visc_gas/10000) ** 0.2) * self.Cp * 1000 / \
-                   (self.prandtl ** 0.6)
+        bartz[1] = ((self.visc_gas[0][0]/10000) ** 0.2) * self.Cp[0][0] * 1000 / \
+                   (self.prandtl[0][0] ** 0.6)
         bartz[2] = (self.press_chamber * 10e6 / self.C_star) ** 0.8
         bartz[3] = (self.Dt / (1.5 * self.Dt / 2)) ** 0.1
         bartz[4] = (self.At / self.Ac) ** 0.9
@@ -186,11 +191,11 @@ class Parameter():
                                   (self.path_width + self.path_height)
             self.vf = self.mf / self.density_fuel / 1000.0 / \
                       (self.path_area / 10e6) / self.path_num
-            self.delta_p = 0.5 * density_fuel * 1000 * self.vf ** 2
+            self.delta_p = 0.5 * self.density_fuel * 1000 * self.vf ** 2
             print("path area = %f[mm^2]" % (self.path_area))
-            print("hydraulic diameter = %f[mm]" % (hydraulic_diam))
-            print("fuel velocity in cooling channel = %f[m/sec]" % (vf))
-            print("channel pressure drop = %f[MPa]" % (delta_p / 10.0e6))
+            print("hydraulic diameter = %f[mm]" % (self.hydraulic_diam))
+            print("fuel velocity in cooling channel = %f[m/sec]" % (self.vf))
+            print("channel pressure drop = %f[MPa]" % (self.delta_p / 10.0e6))
             print("if you are satisfied, type ok")
             input_temp = raw_input()
             if(input_temp == "ok"):
@@ -210,6 +215,7 @@ class Parameter():
     def calc_total_heat_stansfer_coef(self):
         self.rc = 0.000407663;	# carbon heat resistivity
         self.rt = self.rg + self.rf + self.rm + self.rc
+        self.Tc = self.temp_chamber[0][0]
         self.Q = (self.Tc - 298) / self.rt
         self.Tcw = self.Tc - self.Q * (self.rg + self.rc)
         self.Tcwc = self.Tc - self.Q * (self.rg + self.rc + self.rm)
@@ -217,7 +223,7 @@ class Parameter():
     def calc_delta_fuel_temp(self):
         self.A_ct = np.pi * (self.Dc + 2 * self.Ct) * self.Lc
         self.A_ct = self.A_ct * 1.2
-        self.Tf_out = (A_ct * 10e-6) * self.Q / (self.vf * self.thermal_capacity_fuel)
+        self.Tf_out = (self.A_ct * 10e-6) * self.Q / (self.vf * self.thermal_capacity_fuel)
 
 if __name__ == "__main__":
     print("Regenetive cooling...")
