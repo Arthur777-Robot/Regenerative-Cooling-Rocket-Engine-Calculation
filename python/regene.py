@@ -80,7 +80,10 @@ class Parameter():
         # ---- FCEA2コマンド ----
         cmd = 'FCEA2' # FCEA2にはパスを通しておく
         p = subprocess.Popen(cmd, shell=True, stdin=subprocess.PIPE, stdout=subprocess.PIPE)
-        p.communicate(file_name)
+        if 'Windows' == platform.system():
+            p.communicate(file_name + '\n') # Win環境ではコマンド末尾に¥nを付けないとバグる
+        if 'Darwin' == platform.system():
+            p.communicate(file_name)
 
     def read_CEA(self):
         col_name = ['c{0:02d}'.format(i) for i in range(20)]
