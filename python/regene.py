@@ -1,5 +1,21 @@
 # -*- coding: utf-8 -*-
-'''再生冷却設計ツール
+'''再生冷却ロケットエンジン設計ツール
+液体燃料ロケットエンジンの再生冷却燃焼器システムの設計・計算ツール
+NASA CEA(Chemical Equilibrium with Applications)を用いて燃焼器内部状態の
+ガス特性を計算し、Bartzの式から熱伝達及び冷却特性を計算する。
+エクセルファイルを入出力ファイルにしている。
+
+参考文献：
+Bartz, D. R., “A Simple Equation for Rapid Estimation of Rocket Nozzle Convective Heat Transfer Coefficients”, Jet Propulsion 1957 Jan. pp.49–51.
+
+The MIT License (MIT)
+Copyright (c) 2016 Seiji Murakami, Takahiro Inagawa
+
+Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files (the "Software"), to deal in the Software without restriction, including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and to permit persons to whom the Software is furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 '''
 import sys
 reload(sys)
@@ -30,7 +46,7 @@ if 'Darwin' == platform.system(): # for Mac
 plt.close('all')
 
 class Parameter():
-    def __init__(self, file_name = u"再生冷却.xlsx"):
+    def __init__(self, file_name):
         print('Paramter initialize...')
         book = file_name
         sheet = "Input"
