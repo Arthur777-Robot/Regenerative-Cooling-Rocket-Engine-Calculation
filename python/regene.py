@@ -9,7 +9,7 @@ NASA CEA(Chemical Equilibrium with Applications)を用いて燃焼器内部状�
 Bartz, D. R., “A Simple Equation for Rapid Estimation of Rocket Nozzle Convective Heat Transfer Coefficients”, Jet Propulsion 1957 Jan. pp.49–51.
 
 The MIT License (MIT)
-Copyright (c) 2016 Seiji Murakami, Takahiro Inagawa
+Copyright (c) 2016 Seiji Arther Murakami, Takahiro Inagawa
 
 Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files (the "Software"), to deal in the Software without restriction, including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and to permit persons to whom the Software is furnished to do so, subject to the following conditions:
 
