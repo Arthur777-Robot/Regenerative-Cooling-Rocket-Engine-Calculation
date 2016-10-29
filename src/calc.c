@@ -39,17 +39,17 @@ void calc_nozzle(void){
 	Ae = At * CEA[nozzle_exit].AeAt;
 	De = sqrt(4 * Ae / M_PI);
 
-	printf("At = %f[mm^2]\n",At);
-	printf("Dt = %f[mm]\n",Dt);
-	printf("Ae = %f[mm^2]\n",Ae);
-	printf("De = %f[mm]\n",De);
+	printf("Nozzle throat area: At = %f[mm^2]\n",At);
+	printf("Nozzle throat diameter: Dt = %f[mm]\n",Dt);
+	printf("Nozzle exit area: Ae = %f[mm^2]\n",Ae);
+	printf("Nozzle exit diameter: De = %f[mm]\n",De);
 
 	//calculate conical nozzle length
 
 	Ln = 1.5 * Dt/2 * sin(convert_to(rad,15)) 
 			+ (Dt/2 * CEA[nozzle_exit].AeAt - Dt/2)/tan(convert_to(rad,15));
 
-	printf("Ln = %f[mm]\n",Ln);
+	printf("Nozzle Length from throat to exit: Ln = %f[mm]\n",Ln);
 }
 
 void calc_chamber(void){
@@ -58,11 +58,11 @@ void calc_chamber(void){
 
 	Vc = At * convert_to(mm,L_STAR);
 	
-	printf("Vc = %f[mm^3]\n",Vc);
+	printf("Chamber volume: Vc = %f[mm^3]\n",Vc);
 
 	while(1){
 		printf("input chamber diameter in mm. when satisfied, input type ok\n");
-		printf("Dc = ");
+		printf("Chamber Diameter: Dc = ");
 		scanf("%s",temp);
 		if(strcmp(temp,"ok") == 0){
 			break;	
@@ -73,8 +73,8 @@ void calc_chamber(void){
 			}else{
 				Lc = Vc / (Dc * Dc * M_PI / 4);
 				Ac = Dc * Dc * M_PI / 4;
-				printf("Lc = %f[mm]\n",Lc);
-				printf("Ac = %f[mm^2]\n",Ac);
+				printf("Chamber length: Lc = %f[mm]\n",Lc);
+				printf("Chamber area: Ac = %f[mm^2]\n",Ac);
 			}
 		}
 	}
@@ -83,16 +83,16 @@ void calc_chamber(void){
 void calc_chamber_strength(void){
 	Ct = (PC * Dc) / ((2 * TENSILE_STRENGTH / SAFETY_COEFF) - 1.2 * PC);
 
-	printf("Ct = %f\n",Ct);
+	printf("Chamber Thickness: Ct = %f\n",Ct);
 }
 
 void calc_fuel_consumption(void){
 	mt = THRUST / (CEA[nozzle_exit].Isp);
 	mf = mt / (OF + 1);
 	mo = mt * OF / (OF + 1);
-	printf("mt = %f[kg/sec]\n",mt);
-	printf("mf = %f[kg/sec]\n",mf);
-	printf("mo = %f[kg/sec]\n",mo);
+	printf("Total Fuel Consumption: mt = %f[kg/sec]\n",mt);
+	printf("Fuel Consumption: mf = %f[kg/sec]\n",mf);
+	printf("Oxidizer consumption: mo = %f[kg/sec]\n",mo);
 }
 
 void calc_regene(void){
@@ -126,8 +126,8 @@ void calc_gas_heat_stansfer_coeff(void){
 	}
 
 	rg = 1 / hg;
-	printf("gas heat conductivity = %f[W/m^2K]\n",hg);
-	printf("gas heat resistance  = %f[m^2K/W]\n",rg);
+	printf("Gas heat conductivity: = %f[W/m^2K]\n",hg);
+	printf("Gas heat resistance:  = %f[m^2K/W]\n",rg);
 }
 
 
@@ -139,6 +139,7 @@ void calc_fuel_heat_stansfer_coeff(void){ //helical coil type
 
 	while(1){
 		printf("input fuel path dimention for cooling\n");
+		printf("Fuel velocity in cooling channel should be from 9-12m/sec\n");
 		printf("path width [mm] = ");
 		scanf("%s",temp1);
 		printf("path height[mm] = ");
@@ -157,10 +158,10 @@ void calc_fuel_heat_stansfer_coeff(void){ //helical coil type
 
 		delta_p = 0.5 * DENSITY_FUEL * 1000 * pow(vf,2);
 
-		printf("path area = %f[mm^2]\n",path_area);
-		printf("hydraulic diameter = %f[mm]\n",hydraulic_diam);
-		printf("fuel velocity in cooling channel = %f[m/sec]\n",vf);
-		printf("channel pressure drop = %f[MPa]\n",convert_to(MPa,delta_p));
+		printf("Path area = %f[mm^2]\n",path_area);
+		printf("Hydraulic diameter = %f[mm]\n",hydraulic_diam);
+		printf("Fuel velocity in cooling channel = %f[m/sec]\n",vf);
+		printf("Channel pressure drop = %f[MPa]\n",convert_to(MPa,delta_p));
 
 		printf("if you are satisfied, type ok\n");
 		scanf("%s",temp1);
@@ -182,8 +183,8 @@ void calc_fuel_heat_stansfer_coeff(void){ //helical coil type
 	printf("Reynolds number of liquid = %f\n",Re);
 	printf("Prandtle number of liquid = %f\n",Pr);
 	printf("Nusselt number of liquid = %f\n",Nu);
-	printf("hf = %f[W/m^2K]\n",hf);
-	printf("rf = %e[m^2K/W]\n",rf);
+	printf("Fuel heat conductivity: hf = %f[W/m^2K]\n",hf);
+	printf("Fuel heat resistance: rf = %e[m^2K/W]\n",rf);
 	
 }
 
@@ -207,11 +208,11 @@ void calc_total_heat_stansfer_coeff(void){
 	Tcw = CEA[chamber].Tc - Q * (rg + rc);
 	Tcwc = CEA[chamber].Tc - Q * (rg + rc + rm);
 
-	printf("total heat resistance = %f[m^2K/W]\n",rt);
-	printf("total heat transfer = %f[MW/m^2]\n",Q/1000000);
-	printf("chamber wall temp = %f[deg_c]\n",convert_to(deg_c,Tcw));
-	printf("chamber wall channel temp = %f[deg_c]\n",convert_to(deg_c,Tcwc));
-	printf("check = %f[K]\n",CEA[chamber].Tc - Q * (rt));
+	printf("Total heat resistance = %f[m^2K/W]\n",rt);
+	printf("Total heat transfer = %f[MW/m^2]\n",Q/1000000);
+	printf("Chamber wall temp = %f[deg_c]\n",convert_to(deg_c,Tcw));
+	printf("Chamber wall channel temp = %f[deg_c]\n",convert_to(deg_c,Tcwc));
+	printf("Check = %f[K]\n",CEA[chamber].Tc - Q * (rt));
 
 }
 
@@ -224,7 +225,7 @@ void calc_delta_fuel_temp(void){
 	Tf_out = convert_to(m2,A_ct) * Q / (vf * CP_F);
 
 	printf("Chamber area total = %f[mm^2]\n",convert_to(m2,A_ct));
-	printf("total heat to wall = %f[W]\n",convert_to(m2,A_ct*Q));
+	printf("Total heat to wall = %f[W]\n",convert_to(m2,A_ct*Q));
 	printf("Fuel delta temp = %f[deg_c]\n",Tf_out);
 
 }
@@ -232,3 +233,5 @@ void calc_delta_fuel_temp(void){
 void calc_fuel_cost(void){
 
 }
+
+
