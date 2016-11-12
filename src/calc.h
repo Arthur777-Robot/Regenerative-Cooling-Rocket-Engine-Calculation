@@ -16,4 +16,6 @@ void calc_total_heat_stansfer_coeff(void);
 void calc_delta_fuel_temp(void);
 void calc_fuel_cost(void);
 
+void plot_chamber(void);
+
 #endif
