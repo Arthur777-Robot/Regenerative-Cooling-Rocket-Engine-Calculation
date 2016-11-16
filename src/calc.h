@@ -17,5 +17,6 @@ void calc_delta_fuel_temp(void);
 void calc_fuel_cost(void);
 
 void plot_chamber(void);
+float CEA_coeff(int x, float chamber, float throat, float nozzle_exit);
 
 #endif

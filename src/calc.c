@@ -239,7 +239,7 @@ void calc_fuel_cost(void){
 void plot_chamber(void){
 	FILE *gp;
 	int i = 0;
-	int angle1 = 35,angle2 = 15,size1 = 20;
+	int angle1 = 35,angle2 = 15,size1 = 40;
 	float x[7],y[7];
 	float vol[5],area[5],total_area;
 
@@ -249,7 +249,7 @@ void plot_chamber(void){
 	x[2] = size1 * cos(convert_to(rad,90 - angle1)) + x[1];
 	y[2] = size1 * sin(convert_to(rad,90 - angle1)) + y[1] - size1;
 	y[3] = Dt / 2 * 1.5 * sin(convert_to(rad,270 - angle1)) + Dt / 2 + Dt / 2 * 1.5;
-	x[3] = (y[2]-y[3])/tan(convert_to(rad,angle1));
+	x[3] = (y[2]-y[3])/tan(convert_to(rad,angle1)) + x[2];		//i think this makes error
 	x[4] = -Dt / 2 * 1.5 * cos(convert_to(rad,270 - angle1)) + x[3];
 	y[4] = Dt / 2;
 	x[5] = Dt / 2 * 1.5 * cos(convert_to(rad,270 + angle2)) + x[4];
@@ -269,6 +269,7 @@ void plot_chamber(void){
 
 	for(i = 1; i < 7; i++){
 		x[i] += area[0]/(Dc/2);
+		printf("x[%d] = %f,y[%d] = %f\n",i,x[i],i,y[i]);
 	}
 
 	//calculate chamber volume by section
@@ -298,14 +299,17 @@ void plot_chamber(void){
 		chamber_x[i] = i;
 		chamber_y[i] = Dc/2;
 	}
+	printf("i = %d\n",i);
 	for(i = (int)x[1]+1; i<x[2];i++){
 		chamber_x[i] = i;
 		chamber_y[i] = pow(pow(size1,2)-pow(i-x[1],2),0.5) + Dc/2 - size1;
 	}
+	printf("i = %d\n",i);
 	for(i = (int)x[2]+1; i<x[3];i++){
 		chamber_x[i] = i;
 		chamber_y[i] = (y[3]-y[2])/(x[3]-x[2])*i + y[2] - (y[3]-y[2])/(x[3]-x[2])*x[2];
 	}
+	printf("i = %d\n",i);
 	for(i = (int)x[3]+1; i<x[5];i++){
 		chamber_x[i] = i;
 		chamber_y[i] = -pow(pow(Dt / 2 * 1.5,2)-pow(i-x[4],2),0.5) + Dt/2 + Dt / 2 * 1.5;
@@ -320,6 +324,7 @@ void plot_chamber(void){
 	
 	gp = popen("gnuplot -persist","w");
 	fprintf(gp,"set datafile separator \"\t\"\n");
+	fprintf(gp,"set size square\n");
 	fprintf(gp,"set xrange[-10:%f]\n",x[6]+10);
 	fprintf(gp,"set yrange[-10:%f]\n",x[6]+10);
 	fprintf(gp,"plot '-' with lines\n");
@@ -331,3 +336,8 @@ void plot_chamber(void){
 
 	pclose(gp);
 } 
+
+float CEA_coeff(int x, float chamber, float throat, float nozzle_exit){
+
+	return 0;
+}
