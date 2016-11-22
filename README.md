@@ -2,9 +2,13 @@
 This program will calculate regenerative cooling rocket engine specification.
 
 work in unix environment.
+
 If Mingw and gnuplot are installed to your Windows and path are set, it will work also.
+
 offline CEA from NASA needs to be install in order to use this program.
+
 https://www.grc.nasa.gov/WWW/CEAWeb/ceaguiDownload-unix.htm
+
 FCEA2 command must be pathed.
 
 If you are Japanese, this website will describe how to install CEA to MACOS.
@@ -21,17 +25,25 @@ It is still under developement.
 
 #To Do List
 able to spit out DXF file for the chamber geometry
+
 able to select cooling channel type. now it is only for helical coil seen like in LR-101
+
 able to select conical and bell nozzle
 
 if there are any request, I will think about it.
 
+
 #done list
 able to calculate gas properties from CEA
+
 able to calculate chamber geometry from CEA result
+
 able to calculate regenerative cooling with model of helical cooling channel 
+
 able to plot the properties to txt file
+
 able to graph the properties using gnuplot
+
 
 #License
 The MIT License (MIT)
