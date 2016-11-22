@@ -22,14 +22,79 @@ static float hg,rg,hf,rf,hm,rm,rc,rt;	//rc for carbon heat resist
 
 static float Q, Tcw,Tf_out;
 
+static float throat_axis;
+static int exit_axis;
+
+#define char_num 2014
 void calc_chamber_spec(void){
 
+	int i = 0;
+	FILE *fp,*gp;
+	
+	int chamber_x[char_num];
+	float chamber_y[char_num],gas_heat_conductivity[char_num],
+		total_heat[char_num],temp_chamber[char_num],temp_channel[char_num],
+		fuel_temp[char_num];
+	float tmp_Cp,tmp_visc_gas,tmp_prandtl,tmp_gas_temp;
+
 	calc_nozzle();
-	calc_chamber();
+	calc_chamber(chamber_x,chamber_y);
 	calc_chamber_strength();
 	calc_fuel_consumption();
-	calc_regene();
+	
+	calc_fuel_heat_transfer();
+	calc_metal_heat_transfer();
 
+	for( i = 0; i < exit_axis;i++){
+		tmp_visc_gas = CEA_coeff(i,chamber_y,CEA[chamber].Visc_gas,
+				CEA[throat].Visc_gas,CEA[nozzle_exit].Visc_gas);
+		tmp_Cp = CEA_coeff(i,chamber_y,CEA[chamber].Cp,CEA[throat].Cp,
+				CEA[nozzle_exit].Cp);
+		tmp_prandtl = CEA_coeff(i,chamber_y,CEA[chamber].Prandtl_gas,
+				CEA[throat].Prandtl_gas,CEA[nozzle_exit].Prandtl_gas);
+		tmp_gas_temp = CEA_coeff(i,chamber_y,CEA[chamber].Tc,CEA[throat].Tc,
+				CEA[nozzle_exit].Tc);
+
+		calc_gas_heat_transfer(chamber_y[i],tmp_visc_gas,tmp_Cp,tmp_prandtl);
+		calc_total_heat_transfer(i,tmp_gas_temp,total_heat,temp_chamber,
+				temp_channel);
+	}
+	
+	fuel_temp[exit_axis + 1] = 0;
+	for(i = exit_axis + 1; i >=0; i--){
+		fuel_temp[i] = fuel_temp[i + 1] + calc_delta_fuel_temp(chamber_y[i],total_heat[i]);
+	}
+
+	fp = fopen("data.txt","w");
+	for(i = 0; i < exit_axis; i++){
+		fprintf(fp,"%d\t%f\t%f\t%f\t%f\t%f\n",
+				chamber_x[i],chamber_y[i],temp_chamber[i],
+				temp_channel[i],total_heat[i]/1000000,fuel_temp[i]);
+	}
+	fflush(fp);
+	fclose(fp);
+
+	gp = popen("gnuplot -persist","w");
+	fprintf(gp,"set datafile separator \"\t\"\n");
+	fprintf(gp,"set size square\n");
+	fprintf(gp,"set title 'Kerosene 5kN 1.6Mpa'\n");
+	fprintf(gp,"set key outside\n");
+	fprintf(gp,"set ytics nomirror\n");
+	fprintf(gp,"set y2tics\n");
+	fprintf(gp,"set grid\n");
+	fprintf(gp,"set xlabel '[mm]'\n");
+	fprintf(gp,"set ylabel '[mm],[deg_c]'\n");
+	fprintf(gp,"set y2label '[MW],[deg_c]'\n");
+	fprintf(gp,"set xrange[-10:%d]\n",chamber_x[exit_axis]+10);
+	fprintf(gp,"set yrange[-10:%d]\n",chamber_x[exit_axis]+10);
+	fprintf(gp,"set y2range[0:%d]\n",10);
+	fprintf(gp,"plot \"data.txt\" u 1:2 w l t \"chamber geom\"\n");
+	fprintf(gp,"replot \"data.txt\" u 1:3 w l t \"chamber wall temp\"\n");
+	fprintf(gp,"replot \"data.txt\" u 1:4 w l t \"channel wall temp\"\n");
+	fprintf(gp,"replot \"data.txt\" u 1:5 w l t \"Heat Transfer 2nd axis\" axes x1y2\n");
+	fprintf(gp,"replot \"data.txt\" u 1:6 w l t \"Fuel delta temp 2nd axis\"  axes x1y2,\n");
+
+	pclose(gp);
 }
 
 void calc_nozzle(void){
@@ -47,12 +112,12 @@ void calc_nozzle(void){
 	//calculate conical nozzle length
 
 	Ln = 1.5 * Dt/2 * sin(convert_to(rad,15)) 
-			+ (Dt/2 * CEA[nozzle_exit].AeAt - Dt/2)/tan(convert_to(rad,15));
+			+ (De/2 - Dt/2)/tan(convert_to(rad,15));
 
 	printf("Nozzle Length from throat to exit: Ln = %f[mm]\n",Ln);
 }
 
-void calc_chamber(void){
+void calc_chamber(int *chamber_x,float *chamber_y){
 
 	char temp[64];
 
@@ -73,9 +138,9 @@ void calc_chamber(void){
 			}else{
 				Lc = Vc / (Dc * Dc * M_PI / 4);
 				Ac = Dc * Dc * M_PI / 4;
+				Lc = plot_chamber(chamber_x,chamber_y);
 				printf("Chamber length: Lc = %f[mm]\n",Lc);
 				printf("Chamber area: Ac = %f[mm^2]\n",Ac);
-				plot_chamber();
 			}
 		}
 
@@ -97,43 +162,36 @@ void calc_fuel_consumption(void){
 	printf("Oxidizer consumption: mo = %f[kg/sec]\n",mo);
 }
 
-void calc_regene(void){
 
-	calc_gas_heat_stansfer_coeff();
-	calc_fuel_heat_stansfer_coeff();
-	calc_metal_heat_stansfer_coeff();
-	calc_total_heat_stansfer_coeff();
-	calc_delta_fuel_temp();
-}
 
 // using bartz
 // needs to be modified for geometrical change in chamber
-void calc_gas_heat_stansfer_coeff(void){
-	int i = 0;
+void calc_gas_heat_transfer(float chamber_y,float tmp_visc_gas, float tmp_Cp, float tmp_prandtl_gas){
+	int j = 0;
 	float bartz[6];
 	hg = 1;
 
 	bartz[0] = 0.026 / pow(convert_to(m,Dt),0.2);
-	bartz[1] = pow(CEA[chamber].Visc_gas/10000,0.2) * CEA[chamber].Cp * 1000
-				/ pow(CEA[chamber].Prandtl_gas,0.6); 
+	bartz[1] = pow(tmp_visc_gas/10000,0.2) * tmp_Cp * 1000
+				/ pow(tmp_prandtl_gas,0.6); 
 				//visc changed from mmpoise to kgm/sec, Cp transforms to J
 	bartz[2] = pow(convert_to(Pa,PC) / CEA[nozzle_exit].Cstar,0.8);
 	bartz[3] = pow(Dt / (1.5 * Dt / 2),0.1);	//if the nozzle are conical
-	bartz[4] = pow(At / Ac,0.9); //change here for geometrical parameter.
+	bartz[4] = pow(At / (chamber_y*chamber_y*M_PI),0.9); //change here for geometrical parameter.
 
-	
-	for(i = 0; i < 5; i++){
-		hg *= bartz[i];
-//		printf("bartz%d = %f\n",i,bartz[i]);
+	for(j = 0; j < 5; j++){
+		hg *= bartz[j];
+//		printf("bartz%d = %f\n",j,bartz[j]);
 	}
 
 	rg = 1 / hg;
-	printf("Gas heat conductivity: = %f[W/m^2K]\n",hg);
-	printf("Gas heat resistance:  = %f[m^2K/W]\n",rg);
+//	printf("Gas heat conductivity: = %f[W/m^2K]\n",hg);
+//	printf("Gas heat resistance:  = %f[m^2K/W]\n",rg);
+	
 }
 
 
-void calc_fuel_heat_stansfer_coeff(void){ //helical coil type
+void calc_fuel_heat_transfer(void){ //helical coil type
 	float path_width,path_height,path_area,path_num,hydraulic_diam;
 	float nyuf,delta_p;
 	float Re,Pr,Nu;
@@ -190,7 +248,7 @@ void calc_fuel_heat_stansfer_coeff(void){ //helical coil type
 	
 }
 
-void calc_metal_heat_stansfer_coeff(void){
+void calc_metal_heat_transfer(void){
 
 	hm = THRM_COND_METAL;
 	rm = convert_to(m,Ct) / hm;
@@ -200,46 +258,51 @@ void calc_metal_heat_stansfer_coeff(void){
 
 }
 
-void calc_total_heat_stansfer_coeff(void){
+void calc_total_heat_transfer(int i,float chamber_temp,float *total_heat,float *temp_chamber,float *temp_channel){
 	float Tcwc;
 
 	rc = 0.000407663;	//carbon heat resistivity
 
 	rt = rg + rf + rm + rc;
-	Q = (CEA[chamber].Tc - 298) / rt;
-	Tcw = CEA[chamber].Tc - Q * (rg + rc);
-	Tcwc = CEA[chamber].Tc - Q * (rg + rc + rm);
+	Q = (chamber_temp - 298) / rt;
+	Tcw = chamber_temp - Q * (rg + rc);
+	Tcwc = chamber_temp - Q * (rg + rc + rm);
 
-	printf("Total heat resistance = %f[m^2K/W]\n",rt);
-	printf("Total heat transfer = %f[MW/m^2]\n",Q/1000000);
-	printf("Chamber wall temp = %f[deg_c]\n",convert_to(deg_c,Tcw));
-	printf("Chamber wall channel temp = %f[deg_c]\n",convert_to(deg_c,Tcwc));
-	printf("Check = %f[K]\n",CEA[chamber].Tc - Q * (rt));
+	total_heat[i] = Q;
+	temp_chamber[i] = convert_to(deg_c,Tcw);
+	temp_channel[i] = convert_to(deg_c,Tcwc);
+
+//	printf("Total heat resistance = %f[m^2K/W]\n",rt);
+//	printf("Total heat transfer = %f[MW/m^2]\n",total_heat[i]);
+//	printf("Chamber wall temp = %f[deg_c]\n",temp_chamber[i]);
+//	printf("Chamber wall channel temp = %f[deg_c]\n",temp_channel[i]);
+//	printf("rg = %f\trf = %f\trm = %f\trc = %f\n",rg,rf,rm,rc);
+//	printf("Check = %f[K]\n",chamber_temp - Q * (rt));
 
 }
 
-void calc_delta_fuel_temp(void){
+float calc_delta_fuel_temp(float chamber_y, float total_heat){
 	float A_ct;		//Chamber total area
 
-	A_ct = M_PI * (Dc + 2 * Ct) * Lc;
-	A_ct = A_ct * 1.2;		//nozzle are typically 10% of chamber
+	A_ct = 2 * M_PI * (chamber_y + Ct);
 
-	Tf_out = convert_to(m2,A_ct) * Q / (vf * CP_F);
+	Tf_out = convert_to(m2,A_ct) * total_heat / (vf * CP_F);
 
-	printf("Chamber area total = %f[mm^2]\n",convert_to(m2,A_ct));
-	printf("Total heat to wall = %f[W]\n",convert_to(m2,A_ct*Q));
-	printf("Fuel delta temp = %f[deg_c]\n",Tf_out);
+//	printf("Chamber area total = %f[mm^2]\n",convert_to(m2,A_ct));
+//	printf("Total heat to wall = %f[W]\n",convert_to(m2,A_ct*total_heat));
+//	printf("Fuel delta temp = %f[deg_c]\n",Tf_out);
 
+	return Tf_out;
 }
 
 void calc_fuel_cost(void){
 
 }
 
-void plot_chamber(void){
+int plot_chamber(int *chamber_x, float *chamber_y){
 	FILE *gp;
 	int i = 0;
-	int angle1 = 35,angle2 = 15,size1 = 40;
+	int angle1 = 20,angle2 = 15,size1 = 40;
 	float x[7],y[7];
 	float vol[5],area[5],total_area;
 
@@ -249,13 +312,14 @@ void plot_chamber(void){
 	x[2] = size1 * cos(convert_to(rad,90 - angle1)) + x[1];
 	y[2] = size1 * sin(convert_to(rad,90 - angle1)) + y[1] - size1;
 	y[3] = Dt / 2 * 1.5 * sin(convert_to(rad,270 - angle1)) + Dt / 2 + Dt / 2 * 1.5;
-	x[3] = (y[2]-y[3])/tan(convert_to(rad,angle1)) + x[2];		//i think this makes error
+	x[3] = (y[2]-y[3])/tan(convert_to(rad,angle1)) + x[2];
 	x[4] = -Dt / 2 * 1.5 * cos(convert_to(rad,270 - angle1)) + x[3];
 	y[4] = Dt / 2;
 	x[5] = Dt / 2 * 1.5 * cos(convert_to(rad,270 + angle2)) + x[4];
 	y[5] = Dt / 2 * 1.5 * sin(convert_to(rad,270 + angle2)) + Dt / 2 + Dt / 2 * 1.5;
 	x[6] = x[4] + Ln;
-	y[6] = (x[6]-x[5])*tan(convert_to(rad,angle2));
+	y[6] = (x[6]-x[5])*tan(convert_to(rad,angle2)) + y[5];
+
 
 	//calculate chamber area by section
 	area[1] = pow(size1,2)*M_PI*angle1/360 + (x[2]*(y[2]-y[1]-size1)/2) + (y[1]-size1)*x[2];
@@ -269,8 +333,11 @@ void plot_chamber(void){
 
 	for(i = 1; i < 7; i++){
 		x[i] += area[0]/(Dc/2);
-		printf("x[%d] = %f,y[%d] = %f\n",i,x[i],i,y[i]);
+//		printf("x[%d] = %f,y[%d] = %f\n",i,x[i],i,y[i]);
 	}
+
+	throat_axis = x[4];
+	exit_axis = x[6];
 
 	//calculate chamber volume by section
 //	vol[1] = (0.5 + pow(size1,2) + pow(y[1]-size1,2))*convert_to(rad,angle1)
@@ -292,24 +359,18 @@ void plot_chamber(void){
 //	printf("Chamber length = %f\n",area[0]/(Dc/2));
 
 
-	//this is unbeleaveable to do it
-	float chamber_x[(int)x[6]+1],chamber_y[(int)x[6]+1];
-
 	for(i = 0; i<x[1];i++){
 		chamber_x[i] = i;
 		chamber_y[i] = Dc/2;
 	}
-	printf("i = %d\n",i);
 	for(i = (int)x[1]+1; i<x[2];i++){
 		chamber_x[i] = i;
 		chamber_y[i] = pow(pow(size1,2)-pow(i-x[1],2),0.5) + Dc/2 - size1;
 	}
-	printf("i = %d\n",i);
 	for(i = (int)x[2]+1; i<x[3];i++){
 		chamber_x[i] = i;
 		chamber_y[i] = (y[3]-y[2])/(x[3]-x[2])*i + y[2] - (y[3]-y[2])/(x[3]-x[2])*x[2];
 	}
-	printf("i = %d\n",i);
 	for(i = (int)x[3]+1; i<x[5];i++){
 		chamber_x[i] = i;
 		chamber_y[i] = -pow(pow(Dt / 2 * 1.5,2)-pow(i-x[4],2),0.5) + Dt/2 + Dt / 2 * 1.5;
@@ -318,6 +379,7 @@ void plot_chamber(void){
 		chamber_x[i] = i;
 		chamber_y[i] = (y[6]-y[5])/(x[6]-x[5])*i + y[5] - (y[6]-y[5])/(x[6]-x[5])*x[5];
 	}
+
 //	for(i = 0; i < x[6];i++){
 //		printf("x = %f\ty = %f\n",chamber_x[i],chamber_y[i]);
 //	}
@@ -325,19 +387,39 @@ void plot_chamber(void){
 	gp = popen("gnuplot -persist","w");
 	fprintf(gp,"set datafile separator \"\t\"\n");
 	fprintf(gp,"set size square\n");
+	fprintf(gp,"set title 'Kerosene'\n");
+	fprintf(gp,"set xlabel '[mm]'\n");
+	fprintf(gp,"set ylabel '[mm]'\n");
 	fprintf(gp,"set xrange[-10:%f]\n",x[6]+10);
 	fprintf(gp,"set yrange[-10:%f]\n",x[6]+10);
 	fprintf(gp,"plot '-' with lines\n");
 	
 	for(i = 0; i<x[6]; i++){
-		fprintf(gp,"%f\t%f\n",chamber_x[i],chamber_y[i]);
+		fprintf(gp,"%d\t%f\n",chamber_x[i],chamber_y[i]);
 	}
 	fprintf(gp,"e\n");
 
 	pclose(gp);
+	return x[6];
 } 
 
-float CEA_coeff(int x, float chamber, float throat, float nozzle_exit){
+float CEA_coeff(int x, float *chamber_y, float chamber, float throat, float nozzle_exit){
 
-	return 0;
+	float diff_c1;
+	float coeff;
+	float val;
+
+	if(x < throat_axis){
+		diff_c1 = (Dc - Dt)/2;
+		coeff = (chamber_y[x] - Dt/2)/diff_c1;
+		val = (chamber - throat)*coeff + throat;
+	}else if(x >= throat_axis){
+		diff_c1 = (De - Dt)/2;
+		coeff = (chamber_y[x] - Dt/2)/diff_c1;
+		val = (nozzle_exit - throat)*coeff + throat;
+	}
+
+//	printf("coeff = %f\n",val);
+
+	return val;
 }
