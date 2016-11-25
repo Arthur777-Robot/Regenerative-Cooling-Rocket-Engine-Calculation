@@ -5,6 +5,7 @@
 #include"calc.h"
 #include"valuables.h"
 #include"utilities.h"
+#include"dxf.h"
 
 //valuables frem runCEA.C
 extern T_CEA CEA[3]; // parameter for chamber, throat, exit
@@ -127,6 +128,7 @@ void calc_chamber(int *chamber_x,float *chamber_y){
 
 	while(1){
 		printf("input chamber diameter in mm. when satisfied, input type ok\n");
+		printf("chamber Diameter should be around %d ~ %d mm\n",(int)Dt*2,(int)Dt*3);
 		printf("Chamber Diameter: Dc = ");
 		scanf("%s",temp);
 		if(strcmp(temp,"ok") == 0){
@@ -300,11 +302,15 @@ void calc_fuel_cost(void){
 }
 
 int plot_chamber(int *chamber_x, float *chamber_y){
-	FILE *gp;
+	FILE *gp,*fp;
 	int i = 0;
-	int angle1 = 20,angle2 = 15,size1 = 40;
+	int angle1 = 20,angle2 = 15,size1;
 	float x[7],y[7];
 	float vol[5],area[5],total_area;
+
+	fp = fopen("chamber.dxf","w");
+
+	size1 = (int)Dt*2;
 
 	//calculate coordinates of chamber
 	x[1] = 0;
@@ -338,6 +344,16 @@ int plot_chamber(int *chamber_x, float *chamber_y){
 
 	throat_axis = x[4];
 	exit_axis = x[6];
+
+	dxf_header(&fp);
+	dxf_line(&fp,x[0],y[0],x[1],y[1]);
+	dxf_arc(&fp,x[1],y[1]-size1,size1,90-angle1,90);
+	dxf_line(&fp,x[2],y[2],x[3],y[3]);
+	dxf_arc(&fp,x[4],y[4]+Dt/2*1.5,Dt/2*1.5,270-angle1,270+angle2);
+	dxf_line(&fp,x[5],y[5],x[6],y[6]);
+	dxf_footer(&fp);
+	fflush(fp);
+	fclose(fp);
 
 	//calculate chamber volume by section
 //	vol[1] = (0.5 + pow(size1,2) + pow(y[1]-size1,2))*convert_to(rad,angle1)

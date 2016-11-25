@@ -24,7 +24,7 @@ It is still under developement.
 3: run the program by typing ./regene
 
 #To Do List
-able to spit out DXF file for the chamber geometry
+able to run the program by just reading the input files. not compilling everytime
 
 able to select cooling channel type. now it is only for helical coil seen like in LR-101
 
@@ -43,6 +43,8 @@ able to calculate regenerative cooling with model of helical cooling channel
 able to plot the properties to txt file
 
 able to graph the properties using gnuplot
+
+able to spit out DXF file for the chamber geometry
 
 
 #License
