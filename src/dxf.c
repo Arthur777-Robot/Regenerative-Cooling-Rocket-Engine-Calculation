@@ -4,16 +4,6 @@
 void dxf_header(FILE **fp){
 
 	fprintf(*fp,"0\nSECTION\n"
-			"2\nTABLES\n"
-			"0\nTABLE\n"
-			"0\nLAYER\n"
-			"2\nLayer0\n"
-			"70\n1\n"
-			"62\n7\n"
-			"6\nCONTINUOUS\n"
-			"0\nENDTAB\n"
-			"0\nENDSEC\n"
-			"0\nSECTION\n"
 			"2\nENTITIES\n");
 
 }
