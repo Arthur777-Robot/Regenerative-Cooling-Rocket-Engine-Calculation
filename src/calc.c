@@ -311,14 +311,14 @@ void calc_fuel_cost(void){
 
 }
 
-/*int calc_chamber_geom(int *chamber_x, float *chamber_y){
-	FILE *gp,*fp;
-	int i = 0;
-	int angle1 = 20,angle2 = 15,size1;
-	float x[7],y[7];
-	float vol[5],area[5],total_area;
+int calc_chamber_geom(void){
 
-	fp = fopen("chamber.dxf","w");
+	FILE *fp;
+	int i = 0;
+	int angle1 = 20,size1;
+	float x[5],y[5];
+	float area[5],total_area;
+
 
 	size1 = (int)Dt*2;
 
@@ -331,11 +331,7 @@ void calc_fuel_cost(void){
 	x[3] = (y[2]-y[3])/tan(convert_to(rad,angle1)) + x[2];
 	x[4] = -Dt / 2 * 1.5 * cos(convert_to(rad,270 - angle1)) + x[3];
 	y[4] = Dt / 2;
-	x[5] = Dt / 2 * 1.5 * cos(convert_to(rad,270 + angle2)) + x[4];
-	y[5] = Dt / 2 * 1.5 * sin(convert_to(rad,270 + angle2)) + Dt / 2 + Dt / 2 * 1.5;
-	x[6] = x[4] + Ln;
-	a[6] = (x[6]-x[5])*tan(convert_to(rad,angle2)) + y[5];
-
+	
 
 	//calculate chamber area by section
 	area[1] = pow(size1,2)*M_PI*angle1/360 + (x[2]*(y[2]-y[1]-size1)/2) + (y[1]-size1)*x[2];
@@ -347,138 +343,12 @@ void calc_fuel_cost(void){
 
 	x[0] = 0; y[0] = Dc/2;
 
-	for(i = 1; i < 7; i++){
+	for(i = 1; i < 5; i++){
 		x[i] += area[0]/(Dc/2);
 //		printf("x[%d] = %f,y[%d] = %f\n",i,x[i],i,y[i]);
 	}
 
 	throat_axis = x[4];
-	exit_axis = x[6];
-
-	dxf_header(&fp);
-	dxf_line(&fp,x[0],y[0],x[1],y[1]);
-	dxf_arc(&fp,x[1],y[1]-size1,size1,90-angle1,90);
-	dxf_line(&fp,x[2],y[2],x[3],y[3]);
-	dxf_arc(&fp,x[4],y[4]+Dt/2*1.5,Dt/2*1.5,270-angle1,270+angle2);
-	dxf_line(&fp,x[5],y[5],x[6],y[6]);
-	dxf_footer(&fp);
-	fflush(fp);
-	fclose(fp);
-
-	//calculate chamber volume by section
-//	vol[1] = (0.5 + pow(size1,2) + pow(y[1]-size1,2))*convert_to(rad,angle1)
-//			-0.25*sin(2*convert_to(rad,angle1)) + 2*size1*(y[1]-size1)*sin(convert_to(rad,angle1));
-//	vol[2] = tan(convert_to(rad,90-angle1))*pow(x[3]-x[2],3)/3;
-//	vol[3] = (0.5 + pow(size1,2) + pow(y[1]-size1,2))*convert_to(rad,angle1)
-//			-0.25*sin(2*convert_to(rad,angle1)) + 2*size1*(y[1]-size1)*sin(convert_to(rad,angle1));
-
-//	for(i = 0; i<7;i++){
-//		printf("x[%d] = %f\ty[%d] = %f\n",i,x[i],i,y[i]);
-//	}
-
-//	for(i = 0; i<4; i++){
-//		printf("area[%d] = %f\n",i,area[i]);
-//		printf("vol[%d] = %f\n",i,vol[i]);
-//	}
-
-//	printf("total area = %f\n",total_area);
-//	printf("Chamber length = %f\n",area[0]/(Dc/2));
-
-
-	for(i = 0; i<x[1];i++){
-		chamber_x[i] = i;
-		chamber_y[i] = Dc/2;
-	}
-	for(i = (int)x[1]+1; i<x[2];i++){
-		chamber_x[i] = i;
-		chamber_y[i] = pow(pow(size1,2)-pow(i-x[1],2),0.5) + Dc/2 - size1;
-	}
-	for(i = (int)x[2]+1; i<x[3];i++){
-		chamber_x[i] = i;
-		chamber_y[i] = (y[3]-y[2])/(x[3]-x[2])*i + y[2] - (y[3]-y[2])/(x[3]-x[2])*x[2];
-	}
-	for(i = (int)x[3]+1; i<x[5];i++){
-		chamber_x[i] = i;
-		chamber_y[i] = -pow(pow(Dt / 2 * 1.5,2)-pow(i-x[4],2),0.5) + Dt/2 + Dt / 2 * 1.5;
-	}
-	for(i = (int)x[5]+1;i <x[6];i++){
-		chamber_x[i] = i;
-		chamber_y[i] = (y[6]-y[5])/(x[6]-x[5])*i + y[5] - (y[6]-y[5])/(x[6]-x[5])*x[5];
-	}
-
-//	for(i = 0; i < x[6];i++){
-//		printf("x = %f\ty = %f\n",chamber_x[i],chamber_y[i]);
-//	}
-	
-	gp = popen("gnuplot -persist","w");
-	fprintf(gp,"set datafile separator \"\t\"\n");
-	fprintf(gp,"set size square\n");
-	fprintf(gp,"set title 'Kerosene'\n");
-	fprintf(gp,"set xlabel '[mm]'\n");
-	fprintf(gp,"set ylabel '[mm]'\n");
-	fprintf(gp,"set xrange[-10:%f]\n",x[6]+10);
-	fprintf(gp,"set yrange[-10:%f]\n",x[6]+10);
-	fprintf(gp,"plot '-' with lines\n");
-	
-	for(i = 0; i<x[6]; i++){
-		fprintf(gp,"%d\t%f\n",chamber_x[i],chamber_y[i]);
-	}
-	fprintf(gp,"e\n");
-
-	pclose(gp);
-	return x[6];
-}*/
-
-int calc_chamber_geom(void){
-
-	FILE *fp;
-	int i = 0;
-	int angle1 = 20,size1;
-	float x[5],y[5];
-	float area[5],total_area;
-
-	fp = fopen("chamber.dxf","w");
-
-	size1 = (int)Dt*2;
-
-	//calculate coordinates of chamber
-	x[1] = 0;
-	y[1] = Dc/2;
-	x[2] = size1 * cos(convert_to(rad,90 - angle1)) + x[1];
-	y[2] = size1 * sin(convert_to(rad,90 - angle1)) + y[1] - size1;
-	y[3] = Dt / 2 * 1.5 * sin(convert_to(rad,270 - angle1)) + Dt / 2 + Dt / 2 * 1.5;
-	x[3] = (y[2]-y[3])/tan(convert_to(rad,angle1)) + x[2];
-	x[4] = -Dt / 2 * 1.5 * cos(convert_to(rad,270 - angle1)) + x[3];
-	y[4] = Dt / 2;
-	
-
-		//calculate chamber area by section
-	area[1] = pow(size1,2)*M_PI*angle1/360 + (x[2]*(y[2]-y[1]-size1)/2) + (y[1]-size1)*x[2];
-	area[2] = (y[2]-y[3])*(x[3]-x[2])/2 + y[3]*(x[3]-x[2]);
-	area[3] = (x[4]-x[3])*y[3] - (pow(Dt/2*1.5,2)*M_PI*angle1/360 - (x[4]-x[3])*y[3]/2);
-
-	total_area = area[1]+area[2]+area[3];
-	area[0] = Dc*Lc/2 - total_area;
-
-	x[0] = 0; y[0] = Dc/2;
-
-	for(i = 0; i < 5; i++){
-		x[i] += area[0]/(Dc/2);
-//		printf("x[%d] = %f,y[%d] = %f\n",i,x[i],i,y[i]);
-	}
-
-	throat_axis = x[4];
-
-	dxf_header(&fp);
-	dxf_line(&fp,x[0],y[0],x[1],y[1]);
-	dxf_arc(&fp,x[1],y[1]-size1,size1,90-angle1,90);
-	dxf_line(&fp,x[2],y[2],x[3],y[3]);
-	dxf_arc(&fp,x[4],y[4]+Dt/2*1.5,Dt/2*1.5,270-angle1,270);
-//	dxf_arc(&fp,x[4],y[4]+Dt/2*1.5,Dt/2*1.5,270-angle1,270+angle2);
-//	dxf_line(&fp,x[5],y[5],x[6],y[6]);
-	dxf_footer(&fp);
-	fflush(fp);
-	fclose(fp);
 
 	for(i = 0; i<x[1];i++){
 		Chamber_x[i] = i;
@@ -502,6 +372,15 @@ int calc_chamber_geom(void){
 //		printf("x = %f\ty = %f\n",Chamber_x[i],Chamber_y[i]);
 //	}
 	
+	
+	fp = fopen("chamber.dxf","w");
+	dxf_header(&fp);
+	dxf_line(&fp,x[0],y[0],x[1],y[1]);
+	dxf_arc(&fp,x[1],y[1]-size1,size1,90-angle1,90);
+	dxf_line(&fp,x[2],y[2],x[3],y[3]);
+	dxf_arc(&fp,x[4],y[4]+Dt/2*1.5,Dt/2*1.5,270-angle1,270);
+	fflush(fp);
+	fclose(fp);
 
 	return x[6];
 }
@@ -509,6 +388,7 @@ int calc_chamber_geom(void){
 void calc_conical(void){
 
 	int i;
+	FILE *fp;
 	float x[3],y[3];
 	int exit_angle = 15;
 
@@ -529,7 +409,12 @@ void calc_conical(void){
 	}
 	exit_axis = (int)x[2];
 
-	printf("exit_axis = %d\n",exit_axis);
+	fp = fopen("chamber.dxf","a");
+	dxf_arc(&fp,x[0],y[0]+Dt/2*1.5,Dt/2*1.5,270,270+exit_angle);
+	dxf_line(&fp,x[1],y[1],x[2],y[2]);
+	dxf_footer(&fp);
+	fflush(fp);
+	fclose(fp);
 }
 
 void calc_foelsch_nozzle(void){
