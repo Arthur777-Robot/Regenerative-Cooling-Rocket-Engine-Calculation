@@ -28,8 +28,9 @@ static float Q, Tcw,Tf_out;
 static float throat_axis;
 static int exit_axis;
 
-static int Chamber_x[char_num];		//chamber geometry
+static float Chamber_x[char_num];		//chamber geometry
 static float Chamber_y[char_num];	//chamber geometry
+
 
 void calc_chamber_spec(void){
 
@@ -71,7 +72,7 @@ void calc_chamber_spec(void){
 
 	fp = fopen("data.txt","w");
 	for(i = 0; i < exit_axis; i++){
-		fprintf(fp,"%d\t%f\t%f\t%f\t%f\t%f\n",
+		fprintf(fp,"%f\t%f\t%f\t%f\t%f\t%f\n",
 				Chamber_x[i],Chamber_y[i],temp_chamber[i],
 				temp_channel[i],total_heat[i]/1000000,fuel_temp[i]);
 	}
@@ -89,8 +90,8 @@ void calc_chamber_spec(void){
 	fprintf(gp,"set xlabel '[mm]'\n");
 	fprintf(gp,"set ylabel '[mm],[deg_c]'\n");
 	fprintf(gp,"set y2label '[MW],[deg_c]'\n");
-	fprintf(gp,"set xrange[-10:%d]\n",Chamber_x[exit_axis]+10);
-	fprintf(gp,"set yrange[-10:%d]\n",Chamber_x[exit_axis]+10);
+	fprintf(gp,"set xrange[-10:%f]\n",Chamber_x[exit_axis]+10);
+	fprintf(gp,"set yrange[-10:%f]\n",Chamber_x[exit_axis]+10);
 	fprintf(gp,"set y2range[0:%d]\n",10);
 	fprintf(gp,"plot \"data.txt\" u 1:2 w l t \"chamber geom\"\n");
 	fprintf(gp,"replot \"data.txt\" u 1:3 w l t \"chamber wall temp\"\n");
@@ -146,10 +147,10 @@ void calc_chamber(void){
 				Ac = Dc * Dc * M_PI / 4;
 				calc_chamber_geom();
 				// select nozzletype
-				calc_conical_nozzle();
+//				calc_conical_nozzle();
 				calc_foelsch_nozzle();
 
-
+				plot_chamber();
 
 				//draw chamber geometry in gnuplot
 				printf("Chamber length: Lc = %f[mm]\n",Lc);
@@ -419,38 +420,75 @@ void calc_conical_nozzle(void){
 }
 
 void calc_foelsch_nozzle(void){
-	int i;
-	int theta = 12;
+	int i,j;
+	float theta;
+	float tmp_theta;
 	float ve,v1,mach,A,gamma;
-	float y0 = Dt/2,y1,x1,r0,r1;
+	float y0,y1,x1,r,r0,r1,alpha;
+	float l,l1,l2,l3;
 
+	theta = convert_to(rad,12);
+	
+	y0 = Dt/2;
 	ve = prandtle_meyer(CEA[nozzle_exit].Mach);
-	v1 = 2 * (ve / 2 - convert_to(rad,theta));
+	v1 = 2 * (ve / 2 - theta);
 	gamma = CEA[chamber].Gamma;
 
 	mach = get_mach_from_prandtle_meyer(v1);
 
 	A = (1/mach)*pow(((gamma-1)*mach*mach + 2)/(gamma + 1),((gamma + 1)/(2*(gamma -1))));
-	y1 = y0*sqrt((A*pow(sin(convert_to(rad,theta)),2))/(1-cos(convert_to(rad,theta))));
-	x1 = 3*0.5*(y1-y0)/tan(convert_to(rad,theta));
+	r1 = y0*sqrt(A/(2*(1-cos(theta))));
+	y1 = r1*sin(theta);
+	x1 = 3*0.5*(y1-y0)/tan(theta);
 
-
+	j = throat_axis;
 	for(i = 0; i<x1; i++){
-		Chamber_x[i] = i + throat_axis;
-		Chamber_y[i] = y0 + (tan(convert_to(rad,theta))/x1)*pow(i,2)*(1-i/(3*x1));
-		printf("x = %d, y =%f\n",Chamber_x[i],Chamber_y[i]);
+		Chamber_x[j] = i + throat_axis;
+		Chamber_y[j] = y0 + (tan(theta)/x1)*pow(i,2)*(1-i/(3*x1));
+		printf("x = %f, y =%f\n",Chamber_x[j],Chamber_y[j]);
+		j++;
 	}
 
-	exit_axis = x1;
+	r0 = r1/sqrt(A);
+//	printf("A = %f\n",A);
+//	printf("y1 = %f\n",y1);
+//	printf("x1 = %f\n",x1);
+//	printf("r0 = %f\n",r0);
+//	printf("r1 = %f\n",r1);
 
-	r1 = y1/sin(convert_to(rad,theta));
-	r0 = A*r1;
-	printf("A = %f\n",A);
-	printf("y1 = %f\n",y1);
-	printf("x1 = %f\n",x1);
-	printf("r0 = %f\n",r0);
-	printf("r1 = %f\n",r1);
+// from here, increment mach number 
+	for(;CEA[nozzle_exit].Mach > mach; mach = mach + 0.005){
+		r = r0*sqrt((1/mach)*
+			pow(((gamma-1)*mach*mach + 2)/(gamma + 1),((gamma + 1)/(2*(gamma -1)))));
+		alpha = asin(1/mach);
+		tmp_theta = 0.5*(ve-prandtle_meyer(mach));
+		l1 = 2*r*sin(alpha)*sin(tmp_theta);
+		l2 = sqrt(pow(2*r*sin(alpha)*sin(tmp_theta),2) + 
+			8*r*r*sin(alpha)*(cos(tmp_theta)-cos(theta)) * 
+			(cos(alpha)*sin(tmp_theta) + sin(alpha + tmp_theta)));
+		l3 = (-2*sin(alpha)*(cos(alpha)*sin(tmp_theta) + sin(alpha + tmp_theta)));
+		l = (l1 - l2)/(l3);
+	
+		Chamber_x[j] = r*cos(tmp_theta) + l*cos(tmp_theta + alpha) +
+				(x1-r1*cos(theta)) + throat_axis;
+		Chamber_y[j] = l*sin(tmp_theta + alpha) + r*sin(tmp_theta);
+		
+		
+//		printf("r = %f\n",r);
+//		printf("alpha = %f\n",alpha);
+//		printf("tmp_theta = %f\n",tmp_theta);
+//		printf("l = %f\n",l);
+//		printf("l1 = %f\n",l1);
+//		printf("l2 = %f\n",l2);
+//		printf("l3 = %f\n",l3);
+//		printf("x = %f, y = %f, j = %d\n",Chamber_x[j],Chamber_y[j],j);
+		j++;
+	}
+	
+	exit_axis = j-1;
 
+	printf("exit = %d\n",exit_axis);
+	printf("index = %d\n",j-1);
 
 }
 
@@ -528,12 +566,12 @@ void plot_chamber(void){
 	fprintf(gp,"set title 'Kerosene'\n");
 	fprintf(gp,"set xlabel '[mm]'\n");
 	fprintf(gp,"set ylabel '[mm]'\n");
-	fprintf(gp,"set xrange[-10:%d]\n",exit_axis+10);
-	fprintf(gp,"set yrange[-10:%d]\n",exit_axis+10);
+	fprintf(gp,"set xrange[-10:%f]\n",Chamber_x[exit_axis]+10);
+	fprintf(gp,"set yrange[-10:%f]\n",Chamber_x[exit_axis]+10);
 	fprintf(gp,"plot '-' with lines\n");
 	
 	for(i = 0; i<exit_axis; i++){
-		fprintf(gp,"%d\t%f\n",Chamber_x[i],Chamber_y[i]);
+		fprintf(gp,"%f\t%f\n",Chamber_x[i],Chamber_y[i]);
 	}
 	fprintf(gp,"e\n");
 
