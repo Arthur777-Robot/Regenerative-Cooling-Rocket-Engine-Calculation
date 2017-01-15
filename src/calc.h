@@ -9,10 +9,10 @@ void calc_nozzle_geom(void);
 void calc_chamber_strength(void);
 void calc_fuel_consumption(void);
 void calc_rao_nozzle(void);
-void calc_conical(void);
+void calc_conical_nozzle(void);
 void calc_foelsch_nozzle(void);
+float get_mach_from_prandtle_meyer(float);
 float prandtle_meyer(float);
-float specific_heat_ratio(void);
 
 // using bartz
 void calc_gas_heat_transfer(float,float,float,float);

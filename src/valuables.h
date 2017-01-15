@@ -30,6 +30,7 @@ typedef struct{
 	float Prandtl_gas;	//
 	float Visc_gas;	//[kg*m/sec]
 	float Mach;
+	float Gamma;
 }T_CEA;
 
 typedef enum{

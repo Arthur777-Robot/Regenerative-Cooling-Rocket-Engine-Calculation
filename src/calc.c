@@ -146,7 +146,8 @@ void calc_chamber(void){
 				Ac = Dc * Dc * M_PI / 4;
 				calc_chamber_geom();
 				// select nozzletype
-				calc_conical();
+				calc_conical_nozzle();
+				calc_foelsch_nozzle();
 
 
 
@@ -385,7 +386,7 @@ int calc_chamber_geom(void){
 	return x[6];
 }
 
-void calc_conical(void){
+void calc_conical_nozzle(void){
 
 	int i;
 	FILE *fp;
@@ -418,30 +419,71 @@ void calc_conical(void){
 }
 
 void calc_foelsch_nozzle(void){
+	int i;
 	int theta = 12;
-	float ve,v1;
+	float ve,v1,mach,A,gamma;
+	float y0 = Dt/2,y1,x1,r0,r1;
 
 	ve = prandtle_meyer(CEA[nozzle_exit].Mach);
+	v1 = 2 * (ve / 2 - convert_to(rad,theta));
+	gamma = CEA[chamber].Gamma;
+
+	mach = get_mach_from_prandtle_meyer(v1);
+
+	A = (1/mach)*pow(((gamma-1)*mach*mach + 2)/(gamma + 1),((gamma + 1)/(2*(gamma -1))));
+	y1 = y0*sqrt((A*pow(sin(convert_to(rad,theta)),2))/(1-cos(convert_to(rad,theta))));
+	x1 = 3*0.5*(y1-y0)/tan(convert_to(rad,theta));
 
 
+	for(i = 0; i<x1; i++){
+		Chamber_x[i] = i + throat_axis;
+		Chamber_y[i] = y0 + (tan(convert_to(rad,theta))/x1)*pow(i,2)*(1-i/(3*x1));
+		printf("x = %d, y =%f\n",Chamber_x[i],Chamber_y[i]);
+	}
+
+	exit_axis = x1;
+
+	r1 = y1/sin(convert_to(rad,theta));
+	r0 = A*r1;
+	printf("A = %f\n",A);
+	printf("y1 = %f\n",y1);
+	printf("x1 = %f\n",x1);
+	printf("r0 = %f\n",r0);
+	printf("r1 = %f\n",r1);
+
+
+}
+
+//can calculate from mach 1-10
+float get_mach_from_prandtle_meyer(float v1){
+
+	float num;
+	float mach;
+
+	mach = 1;
+	for(num = 0; num < 8; num++){	//change here for mach precision
+		while(1){
+//			printf("v1 = %f < pr = %f mach = %f\n",v1,prandtle_meyer(mach),mach);
+			if(v1<prandtle_meyer(mach))break;
+			mach = mach + 1/pow(10,num);
+		}
+		mach = mach - 1/pow(10,num);
+	}
+	printf("mach = %f\n",mach);
+	return mach;
 }
 
 float prandtle_meyer(float mach){
 	float vm;
-	float hr;
+	float gamma;
 
-	hr = specific_heat_ratio();
+	gamma = CEA[chamber].Gamma;
 
-	vm = sqrt((hr+1)/(hr-1)) * 
-		atan(sqrt(((hr+1)/(hr-1))*(mach*mach))) - 
+	vm = sqrt((gamma+1)/(gamma-1)) * 
+		atan(sqrt(((gamma-1)/(gamma+1))*(mach*mach - 1))) - 
 		atan(sqrt(mach*mach - 1));
 
 	return vm;
-}
-
-float specific_heat_ratio(void){
-
-	return 1 / (1 - 22.5/(CEA[chamber].Cp*0.008314));
 }
 
 void calc_rao_nozzle_(void){
