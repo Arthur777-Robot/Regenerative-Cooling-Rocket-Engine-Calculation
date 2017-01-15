@@ -82,7 +82,7 @@ void calc_chamber_spec(void){
 	gp = popen("gnuplot -persist","w");
 	fprintf(gp,"set datafile separator \"\t\"\n");
 	fprintf(gp,"set size square\n");
-	fprintf(gp,"set title 'Kerosene 5kN 1.6Mpa'\n");
+	fprintf(gp,"set title 'Kerosene 5kN 1.6Mpa Connical nozzle'\n");
 	fprintf(gp,"set key outside\n");
 	fprintf(gp,"set ytics nomirror\n");
 	fprintf(gp,"set y2tics\n");
@@ -445,7 +445,7 @@ void calc_foelsch_nozzle(void){
 	for(i = 0; i<x1; i++){
 		Chamber_x[j] = i + throat_axis;
 		Chamber_y[j] = y0 + (tan(theta)/x1)*pow(i,2)*(1-i/(3*x1));
-		printf("x = %f, y =%f\n",Chamber_x[j],Chamber_y[j]);
+//		printf("x = %f, y =%f\n",Chamber_x[j],Chamber_y[j]);
 		j++;
 	}
 
@@ -488,7 +488,6 @@ void calc_foelsch_nozzle(void){
 	exit_axis = j-1;
 
 	printf("exit = %d\n",exit_axis);
-	printf("index = %d\n",j-1);
 
 }
 
