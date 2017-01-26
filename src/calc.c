@@ -426,6 +426,7 @@ void calc_foelsch_nozzle(void){
 	float ve,v1,mach,A,gamma;
 	float y0,y1,x1,r,r0,r1,alpha;
 	float l,l1,l2,l3;
+	float angle;
 
 	theta = convert_to(rad,12);
 	
@@ -483,10 +484,11 @@ void calc_foelsch_nozzle(void){
 //		printf("l3 = %f\n",l3);
 //		printf("x = %f, y = %f, j = %d\n",Chamber_x[j],Chamber_y[j],j);
 		j++;
-	}
-	
-	exit_axis = j-1;
 
+	}
+	angle = atan2((Chamber_y[j-1]-Chamber_y[j-2]),(Chamber_x[j-1]-Chamber_x[j-2]));	
+	exit_axis = j-1;
+	printf("angle = %f\n",convert_to(deg,angle));
 	printf("exit = %d\n",exit_axis);
 
 }
