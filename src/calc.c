@@ -13,23 +13,23 @@
 extern T_CEA CEA[3]; // parameter for chamber, throat, exit
 
 //global valuables just in this file
-static float At,Dt,Ae,De,Ln,Ac;
+static double At,Dt,Ae,De,Ln,Ac;
 //At: throat area, Dt:throat Diam, Ae: exit area, De: exit diameter, Ln: nozzle length, Ac:chamber area
-static float Vc,Dc,Lc,Ct,vf;
+static double Vc,Dc,Lc,Ct,vf;
 //Vc: chamber volume, Rc:chamber radius, Lc:chamber length, Ct:chamber thickness
 
-static float mt,mf, mo;
+static double mt,mf, mo;
 //mt: total fuel mass, mf:fuel mass, mo:mass lox
 
-static float hg,rg,hf,rf,hm,rm,rc,rt;	//rc for carbon heat resist
+static double hg,rg,hf,rf,hm,rm,rc,rt;	//rc for carbon heat resist
 
-static float Q, Tcw,Tf_out;
+static double Q, Tcw,Tf_out;
 
-static float throat_axis;
+static double throat_axis;
 static int exit_axis;
 
-static float Chamber_x[char_num];		//chamber geometry
-static float Chamber_y[char_num];	//chamber geometry
+static double Chamber_x[char_num];		//chamber geometry
+static double Chamber_y[char_num];	//chamber geometry
 
 
 void calc_chamber_spec(void){
@@ -37,10 +37,10 @@ void calc_chamber_spec(void){
 	int i = 0;
 	FILE *fp,*gp;
 	
-	float gas_heat_conductivity[char_num],
+	double gas_heat_conductivity[char_num],
 		total_heat[char_num],temp_chamber[char_num],temp_channel[char_num],
 		fuel_temp[char_num];
-	float tmp_Cp,tmp_visc_gas,tmp_prandtl,tmp_gas_temp;
+	double tmp_Cp,tmp_visc_gas,tmp_prandtl,tmp_gas_temp;
 
 	calc_nozzle();
 	calc_chamber();
@@ -66,9 +66,10 @@ void calc_chamber_spec(void){
 	}
 	
 	fuel_temp[exit_axis + 1] = 0;
-	for(i = exit_axis + 1; i >=0; i--){
+	for(i = exit_axis - 1; i >=0; i--){
 		fuel_temp[i] = fuel_temp[i + 1] + calc_delta_fuel_temp(Chamber_y[i],total_heat[i]);
 	}
+	printf("delta temp = %f\n",fuel_temp[10]);
 
 	fp = fopen("data.txt","w");
 	for(i = 0; i < exit_axis; i++){
@@ -82,22 +83,24 @@ void calc_chamber_spec(void){
 	gp = popen("gnuplot -persist","w");
 	fprintf(gp,"set datafile separator \"\t\"\n");
 	fprintf(gp,"set size square\n");
-	fprintf(gp,"set title 'Kerosene 5kN 1.6Mpa Connical nozzle'\n");
+	fprintf(gp,"set title 'Jet-A 5kN 2Mpa Connical nozzle'\n");
 	fprintf(gp,"set key outside\n");
 	fprintf(gp,"set ytics nomirror\n");
 	fprintf(gp,"set y2tics\n");
 	fprintf(gp,"set grid\n");
 	fprintf(gp,"set xlabel '[mm]'\n");
 	fprintf(gp,"set ylabel '[mm],[deg_c]'\n");
-	fprintf(gp,"set y2label '[MW],[deg_c]'\n");
-	fprintf(gp,"set xrange[-10:%f]\n",Chamber_x[exit_axis]+10);
-	fprintf(gp,"set yrange[-10:%f]\n",Chamber_x[exit_axis]+10);
-	fprintf(gp,"set y2range[0:%d]\n",10);
+	fprintf(gp,"set y2label '[MW/m^2],[deg_c]'\n");
+	fprintf(gp,"set xrange[-10:%f]\n",Chamber_x[exit_axis]+100);
+	fprintf(gp,"set yrange[-10:%f]\n",Chamber_x[exit_axis]+100);
+	fprintf(gp,"set y2range[0:%d]\n",20);
 	fprintf(gp,"plot \"data.txt\" u 1:2 w l t \"chamber geom\"\n");
 	fprintf(gp,"replot \"data.txt\" u 1:3 w l t \"chamber wall temp\"\n");
 	fprintf(gp,"replot \"data.txt\" u 1:4 w l t \"channel wall temp\"\n");
+	fprintf(gp,"replot \"data.txt\" u 1:6 w l t \"Fuel delta temp\"\n");
 	fprintf(gp,"replot \"data.txt\" u 1:5 w l t \"Heat Transfer 2nd axis\" axes x1y2\n");
-	fprintf(gp,"replot \"data.txt\" u 1:6 w l t \"Fuel delta temp 2nd axis\"  axes x1y2,\n");
+//	fprintf(gp,"replot \"data.txt\" u 1:6 w l t \"Fuel delta temp\"\n");
+
 
 	pclose(gp);
 }
@@ -147,9 +150,8 @@ void calc_chamber(void){
 				Ac = Dc * Dc * M_PI / 4;
 				calc_chamber_geom();
 				// select nozzletype
-//				calc_conical_nozzle();
-				calc_foelsch_nozzle();
-
+				calc_conical_nozzle();
+//				calc_foelsch_nozzle();
 				plot_chamber();
 
 				//draw chamber geometry in gnuplot
@@ -162,7 +164,8 @@ void calc_chamber(void){
 }
 
 void calc_chamber_strength(void){
-	Ct = (PC * Dc) / ((2 * TENSILE_STRENGTH / SAFETY_COEFF) - 1.2 * PC);
+	Ct = 1;
+//	Ct = (PC * Dc) / ((2 * TENSILE_STRENGTH / SAFETY_COEFF) - 1.2 * PC);
 
 	printf("Chamber Thickness: Ct = %f\n",Ct);
 }
@@ -180,9 +183,9 @@ void calc_fuel_consumption(void){
 
 // using bartz
 // needs to be modified for geometrical change in chamber
-void calc_gas_heat_transfer(float chamber_y,float tmp_visc_gas, float tmp_Cp, float tmp_prandtl_gas){
+void calc_gas_heat_transfer(double chamber_y,double tmp_visc_gas, double tmp_Cp, double tmp_prandtl_gas){
 	int j = 0;
-	float bartz[6];
+	double bartz[6];
 	hg = 1;
 
 	bartz[0] = 0.026 / pow(convert_to(m,Dt),0.2);
@@ -206,9 +209,9 @@ void calc_gas_heat_transfer(float chamber_y,float tmp_visc_gas, float tmp_Cp, fl
 
 
 void calc_fuel_heat_transfer(void){ //helical coil type
-	float path_width,path_height,path_area,path_num,hydraulic_diam;
-	float nyuf,delta_p;
-	float Re,Pr,Nu;
+	double path_width,path_height,path_area,path_num,hydraulic_diam;
+	double nyuf,delta_p;
+	double Re,Pr,Nu;
 	char temp1[64],temp2[64],temp3[64];
 
 	while(1){
@@ -272,10 +275,11 @@ void calc_metal_heat_transfer(void){
 
 }
 
-void calc_total_heat_transfer(int i,float chamber_temp,float *total_heat,float *temp_chamber,float *temp_channel){
-	float Tcwc;
+void calc_total_heat_transfer(int i,double chamber_temp,double *total_heat,double *temp_chamber,double *temp_channel){
+	double Tcwc;
 
-	rc = 0.000407663;	//carbon heat resistivity
+//	rc = 0.000407663;	//carbon heat resistivity
+	rc = 0.0;	//carbon heat resistivity
 
 	rt = rg + rf + rm + rc;
 	Q = (chamber_temp - 298) / rt;
@@ -295,17 +299,22 @@ void calc_total_heat_transfer(int i,float chamber_temp,float *total_heat,float *
 
 }
 
-float calc_delta_fuel_temp(float chamber_y, float total_heat){
-	float A_ct;		//Chamber total area
+double calc_delta_fuel_temp(double chamber_y, double total_heat){
+	double A_ct;		//Chamber total area
+	double temp;
 
 	A_ct = 2 * M_PI * (chamber_y + Ct);
 
-	Tf_out = convert_to(m2,A_ct) * total_heat / (vf * CP_F);
+//	Tf_out = convert_to(m2,A_ct) * total_heat / (vf * CP_F);
+	Tf_out = total_heat*convert_to(m2,A_ct)/CP_F/mf;
 
 //	printf("Chamber area total = %f[mm^2]\n",convert_to(m2,A_ct));
 //	printf("Total heat to wall = %f[W]\n",convert_to(m2,A_ct*total_heat));
 //	printf("Fuel delta temp = %f[deg_c]\n",Tf_out);
-
+//	printf("total_heat = %f\n",total_heat);
+//	printf("A_ct = %f\n",A_ct);
+//	printf("total heat = %f\n",total_heat);
+//	printf("temp = %f\n",Tf_out);
 	return Tf_out;
 }
 
@@ -318,8 +327,8 @@ int calc_chamber_geom(void){
 	FILE *fp;
 	int i = 0;
 	int angle1 = 20,size1;
-	float x[5],y[5];
-	float area[5],total_area;
+	double x[5],y[5];
+	double area[5],total_area;
 
 
 	size1 = (int)Dt*2;
@@ -391,7 +400,7 @@ void calc_conical_nozzle(void){
 
 	int i;
 	FILE *fp;
-	float x[3],y[3];
+	double x[3],y[3];
 	int exit_angle = 15;
 
 	x[0] = throat_axis;
@@ -421,12 +430,12 @@ void calc_conical_nozzle(void){
 
 void calc_foelsch_nozzle(void){
 	int i,j;
-	float theta;
-	float tmp_theta;
-	float ve,v1,mach,A,gamma;
-	float y0,y1,x1,r,r0,r1,alpha;
-	float l,l1,l2,l3;
-	float angle;
+	double theta;
+	double tmp_theta;
+	double ve,v1,mach,A,gamma;
+	double y0,y1,x1,r,r0,r1,alpha;
+	double l,l1,l2,l3;
+	double angle;
 
 	theta = convert_to(rad,12);
 	
@@ -494,15 +503,15 @@ void calc_foelsch_nozzle(void){
 }
 
 //can calculate from mach 1-10
-float get_mach_from_prandtle_meyer(float v1){
+double get_mach_from_prandtle_meyer(double v1){
 
-	float num;
-	float mach;
+	double num;
+	double mach;
 
 	mach = 1;
-	for(num = 0; num < 8; num++){	//change here for mach precision
+	for(num = 0; num < 7; num++){	//change here for mach precision
 		while(1){
-//			printf("v1 = %f < pr = %f mach = %f\n",v1,prandtle_meyer(mach),mach);
+			printf("v1 = %f < pr = %f mach = %f\n",v1,prandtle_meyer(mach),mach);
 			if(v1<prandtle_meyer(mach))break;
 			mach = mach + 1/pow(10,num);
 		}
@@ -512,9 +521,9 @@ float get_mach_from_prandtle_meyer(float v1){
 	return mach;
 }
 
-float prandtle_meyer(float mach){
-	float vm;
-	float gamma;
+double prandtle_meyer(double mach){
+	double vm;
+	double gamma;
 
 	gamma = CEA[chamber].Gamma;
 
@@ -535,11 +544,11 @@ void calc_nozzle_geom(void){
 }
 
 
-float CEA_coeff(int x, float chamber, float throat, float nozzle_exit){
+double CEA_coeff(int x, double chamber, double throat, double nozzle_exit){
 
-	float diff_c1;
-	float coeff;
-	float val;
+	double diff_c1;
+	double coeff;
+	double val;
 
 	if(x < throat_axis){
 		diff_c1 = (Dc - Dt)/2;

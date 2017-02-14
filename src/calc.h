@@ -11,18 +11,18 @@ void calc_fuel_consumption(void);
 void calc_rao_nozzle(void);
 void calc_conical_nozzle(void);
 void calc_foelsch_nozzle(void);
-float get_mach_from_prandtle_meyer(float);
-float prandtle_meyer(float);
+double get_mach_from_prandtle_meyer(double);
+double prandtle_meyer(double);
 
 // using bartz
-void calc_gas_heat_transfer(float,float,float,float);
+void calc_gas_heat_transfer(double,double,double,double);
 void calc_fuel_heat_transfer(void);
 void calc_metal_heat_transfer(void);
-void calc_total_heat_transfer(int,float, float*, float*, float*);
-float calc_delta_fuel_temp(float, float);
+void calc_total_heat_transfer(int,double, double*, double*, double*);
+double calc_delta_fuel_temp(double, double);
 void calc_fuel_cost(void);
 
-float CEA_coeff(int, float, float, float);
+double CEA_coeff(int, double, double, double);
 void plot_chamber(void);
 
 #endif

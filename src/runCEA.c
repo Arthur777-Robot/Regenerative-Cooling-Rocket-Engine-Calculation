@@ -23,6 +23,7 @@ void make_inp(void){
 				"o/f %f\n"
 				"p,bar %f\n"
 				"pip %f\n"
+//				"supar 120\n"
 				"reac\n"
 				" fuel %s wt%%=100 t,k=298.15\n"
 				" oxid %s wt%%=100 t,k=90.17\n"
@@ -52,7 +53,7 @@ void get_CEA_param(void){
 	char temp1[256],temp2[1];
 	FILE *fp;
 
-	char s[12][12] = {"T, K","GAMMAs","MACH NUMBER","VISC","Cp, KJ","PRANDTL","Cp, KJ","PRANDTL","Ae/At","CSTAR","CF","Isp"};
+	char s[13][12] = {"T, K","GAMMAs","MACH NUMBER","VISC","Cp, KJ","PRANDTL","Cp, KJ","PRANDTL","Ae/At","CSTAR","CF","Ivac","Isp"};
 	int i = 0, j = 0;
 	char split[] = " \n";
 	char *addr1,*addr2;
@@ -182,6 +183,16 @@ void get_CEA_param(void){
 //					}
 					break;
 				}else if(i == 11){
+					CEA[0].Ivac = 0;
+					CEA[1].Ivac = atof(addr2);
+					CEA[2].Ivac = atof(strtok(NULL,split));
+
+//					printf("Ivac\n");
+//					for(j = 0;j < 3; j++){
+//						printf("%f\n",CEA[j].Ivac);
+//					}
+					break;
+				}else if(i == 12){
 					CEA[0].Isp = 0;
 					CEA[1].Isp = atof(addr2);
 					CEA[2].Isp = atof(strtok(NULL,split));
@@ -193,7 +204,7 @@ void get_CEA_param(void){
 					break;
 				}
 			}
-			if(i > 10) break;
+			if(i > 13) break;
 			i++;
 		}
 	}

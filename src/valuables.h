@@ -6,31 +6,33 @@
 /**********************************/
 
 #define THRUST 5000		//[N] 
-#define PC	1.6			//[MPa]
-#define OF  2.1			//[ratio]
-#define TYPE_FUEL "C10H21,n-decyl"	//write in CEA format
+#define PC	2.0			//[MPa]
+#define OF  2.3			//[ratio]
+//#define TYPE_FUEL "C10H21,n-decyl"	//write in CEA format
+#define TYPE_FUEL "Jet-A(L)"	//write in CEA format
 #define TYPE_OXIDIZER "O2(L)"	//write in CEA format
-#define DENSITY_FUEL 0.83	//[kg/L] default value is Ethanol
+#define DENSITY_FUEL 0.79	//[kg/L] default value is Ethanol
 #define DENSITY_OXIDIZER 1.14	//[kg/L] default value is LOX
 #define L_STAR 1.4		//[m]
 #define TENSILE_STRENGTH 150 //[N/mm^2] 150[N/mm^2] Cu@250deg_c
 #define SAFETY_COEFF 2.5
-#define CP_F 2093 		//Fuel thermal capacity [J/kgK] 
+#define CP_F 2093.0 		//Fuel thermal capacity [J/kgK] 
 #define VISC_F 0.00074291		//fuel viscocity at high temp [Kgm/sec]
 #define THRM_COND_FUEL 0.133		// fuel thermal conductivity at high temp [W/mK]
-#define THRM_COND_METAL 390		// chamber material heat conductivity [W/mK]
+#define THRM_COND_METAL 390.0		// chamber material heat conductivity [W/mK]
 
 typedef struct{
-	float Tc;		//Chamber Temp[K]
-	float AeAt;		//Throat ratio
-	float Cstar;	//[m/sec]
-	float Isp;		//[sec]
-	float Cf;		//
-	float Cp;		//[J/kg*K]
-	float Prandtl_gas;	//
-	float Visc_gas;	//[kg*m/sec]
-	float Mach;
-	float Gamma;
+	double Tc;		//Chamber Temp[K]
+	double AeAt;		//Throat ratio
+	double Cstar;	//[m/sec]
+	double Isp;		//[sec]
+	double Cf;		//
+	double Cp;		//[J/kg*K]
+	double Prandtl_gas;	//
+	double Visc_gas;	//[kg*m/sec]
+	double Mach;
+	double Gamma;
+	double Ivac;		//[sec]
 }T_CEA;
 
 typedef enum{
