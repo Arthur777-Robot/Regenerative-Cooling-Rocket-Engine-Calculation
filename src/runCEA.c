@@ -53,7 +53,7 @@ void get_CEA_param(void){
 	char temp1[256],temp2[1];
 	FILE *fp;
 
-	char s[13][12] = {"T, K","GAMMAs","MACH NUMBER","VISC","Cp, KJ","PRANDTL","Cp, KJ","PRANDTL","Ae/At","CSTAR","CF","Ivac","Isp"};
+	char s[16][12] = {"T, K","RHO, KG","GAMMAs","SON VEL,","MACH NUMBER","VISC","Cp, KJ","PRANDTL","Cp, KJ","PRANDTL","Ae/At","CSTAR","CF","Ivac","Isp"};
 	int i = 0, j = 0;
 	char split[] = " \n";
 	char *addr1,*addr2;
@@ -82,7 +82,20 @@ void get_CEA_param(void){
 //						printf("%f\n",CEA[j].Tc);
 //					}
 					break;
+
 				}else if(i == 1){
+					CEA[0].Rho = atof(addr2);
+					atof(strtok(NULL,split));
+					CEA[1].Rho = atof(strtok(NULL,split));
+					atof(strtok(NULL,split));
+					CEA[2].Rho = atof(strtok(NULL,split))/10; //i hate this writing
+//					printf("RHO\n");
+//					for(j = 0;j < 3; j++){
+//						printf("%f\n",CEA[j].Rho);
+//					}
+					break;
+
+				}else if(i == 2){
 					CEA[0].Gamma = atof(addr2);
 					CEA[1].Gamma = atof(strtok(NULL,split));
 					CEA[2].Gamma = atof(strtok(NULL,split));
@@ -91,8 +104,18 @@ void get_CEA_param(void){
 //						printf("%f\n",CEA[j].Gamma);
 //					}
 					break;
-	
-				}else if(i == 2){
+
+				}else if(i == 3){
+					CEA[0].Son = atof(addr2);
+					CEA[1].Son = atof(strtok(NULL,split));
+					CEA[2].Son= atof(strtok(NULL,split));
+//					printf("SON\n");
+//					for(j = 0;j < 3; j++){
+//						printf("%f\n",CEA[j].Son);
+//					}
+					break;
+
+				}else if(i == 4){
 					CEA[0].Mach = atof(addr2);
 					CEA[1].Mach = atof(strtok(NULL,split));
 					CEA[2].Mach = atof(strtok(NULL,split));
@@ -102,7 +125,7 @@ void get_CEA_param(void){
 //					}
 					break;
 
-				}else if(i == 3){
+				}else if(i == 5){
 					CEA[0].Visc_gas = atof(addr2);
 					CEA[1].Visc_gas = atof(strtok(NULL,split));
 					CEA[2].Visc_gas = atof(strtok(NULL,split));
@@ -112,7 +135,7 @@ void get_CEA_param(void){
 //						printf("%f\n",CEA[j].Visc_gas);
 //					}
 					break;
-				}else if(i == 4){
+				}else if(i == 6){
 					cp1[0]= atof(addr2);
 					cp1[1]= atof(strtok(NULL,split));
 					cp1[2] = atof(strtok(NULL,split));
@@ -122,7 +145,7 @@ void get_CEA_param(void){
 //						printf("%f\n",cp1[j]);
 //					}
 					break;
-				}else if(i == 5){
+				}else if(i == 7){
 					pr1[0] = atof(addr2);
 					pr1[1] = atof(strtok(NULL,split));
 					pr1[2] = atof(strtok(NULL,split));
@@ -132,7 +155,7 @@ void get_CEA_param(void){
 //						printf("%f\n",pr1[j]);
 //					}
 					break;
-				}else if(i == 6){
+				}else if(i == 8){
 					cp2[0] = atof(addr2);
 					cp2[1] = atof(strtok(NULL,split));
 					cp2[2] = atof(strtok(NULL,split));
@@ -142,7 +165,7 @@ void get_CEA_param(void){
 //						printf("%f\n",cp2[j]);
 //					}
 					break;
-				}else if(i == 7){
+				}else if(i == 9){
 					pr2[0] = atof(addr2);
 					pr2[1] = atof(strtok(NULL,split));
 					pr2[2] = atof(strtok(NULL,split));
@@ -152,7 +175,7 @@ void get_CEA_param(void){
 //						printf("%f\n",pr2[j]);
 //					}
 					break;
-				}else if(i == 8){
+				}else if(i == 10){
 					CEA[0].AeAt = 0;
 					CEA[1].AeAt = atof(addr2);
 					CEA[2].AeAt = atof(strtok(NULL,split));
@@ -162,7 +185,7 @@ void get_CEA_param(void){
 //						printf("%f\n",CEA[j].AeAt);
 //					}
 					break;
-				}else if(i == 9){
+				}else if(i == 11){
 					CEA[0].Cstar = 0;
 					CEA[1].Cstar = atof(addr2);
 					CEA[2].Cstar = atof(strtok(NULL,split));
@@ -172,7 +195,7 @@ void get_CEA_param(void){
 //						printf("%f\n",CEA[j].Cstar);
 //					}
 					break;
-				}else if(i == 10){
+				}else if(i == 12){
 					CEA[0].Cf = 0;
 					CEA[1].Cf = atof(addr2);
 					CEA[2].Cf = atof(strtok(NULL,split));
@@ -182,7 +205,7 @@ void get_CEA_param(void){
 //						printf("%f\n",CEA[j].Cf);
 //					}
 					break;
-				}else if(i == 11){
+				}else if(i == 13){
 					CEA[0].Ivac = 0;
 					CEA[1].Ivac = atof(addr2);
 					CEA[2].Ivac = atof(strtok(NULL,split));
@@ -192,7 +215,7 @@ void get_CEA_param(void){
 //						printf("%f\n",CEA[j].Ivac);
 //					}
 					break;
-				}else if(i == 12){
+				}else if(i == 14){
 					CEA[0].Isp = 0;
 					CEA[1].Isp = atof(addr2);
 					CEA[2].Isp = atof(strtok(NULL,split));
@@ -204,7 +227,7 @@ void get_CEA_param(void){
 					break;
 				}
 			}
-			if(i > 13) break;
+			if(i > 15) break;
 			i++;
 		}
 	}

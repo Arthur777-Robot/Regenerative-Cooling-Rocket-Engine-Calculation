@@ -5,11 +5,12 @@
 /************Defines***************/
 /**********************************/
 
-#define THRUST 5000		//[N] 
-#define PC	2.0			//[MPa]
+#define THRUST 40000		//[N] 
+#define PC	5.0			//[MPa]
 #define OF  2.3			//[ratio]
-//#define TYPE_FUEL "C10H21,n-decyl"	//write in CEA format
-#define TYPE_FUEL "Jet-A(L)"	//write in CEA format
+#define TYPE_FUEL "C10H21,n-decyl"	//write in CEA format
+//#define TYPE_FUEL "Jet-A(L)"	//write in CEA format
+//#define TYPE_FUEL "C2H5OH(L)"	//write in CEA format
 #define TYPE_OXIDIZER "O2(L)"	//write in CEA format
 #define DENSITY_FUEL 0.79	//[kg/L] default value is Ethanol
 #define DENSITY_OXIDIZER 1.14	//[kg/L] default value is LOX
@@ -33,6 +34,8 @@ typedef struct{
 	double Mach;
 	double Gamma;
 	double Ivac;		//[sec]
+	double Son;			//m/sec
+	double Rho;			//Kg/m3
 }T_CEA;
 
 typedef enum{

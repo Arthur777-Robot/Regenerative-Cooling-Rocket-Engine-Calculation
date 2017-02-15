@@ -60,7 +60,8 @@ void calc_chamber_spec(void){
 		tmp_gas_temp = CEA_coeff(i,CEA[chamber].Tc,CEA[throat].Tc,
 				CEA[nozzle_exit].Tc);
 
-		calc_gas_heat_transfer(Chamber_y[i],tmp_visc_gas,tmp_Cp,tmp_prandtl);
+		calc_gas_heat_transfer(i,tmp_visc_gas,tmp_Cp,tmp_prandtl);
+		boundary_layer(i);
 		calc_total_heat_transfer(i,tmp_gas_temp,total_heat,temp_chamber,
 				temp_channel);
 	}
@@ -91,9 +92,9 @@ void calc_chamber_spec(void){
 	fprintf(gp,"set xlabel '[mm]'\n");
 	fprintf(gp,"set ylabel '[mm],[deg_c]'\n");
 	fprintf(gp,"set y2label '[MW/m^2],[deg_c]'\n");
-	fprintf(gp,"set xrange[-10:%f]\n",Chamber_x[exit_axis]+100);
-	fprintf(gp,"set yrange[-10:%f]\n",Chamber_x[exit_axis]+100);
-	fprintf(gp,"set y2range[0:%d]\n",20);
+	fprintf(gp,"set xrange[-10:%f]\n",Chamber_x[exit_axis]+500);
+	fprintf(gp,"set yrange[-10:%f]\n",Chamber_x[exit_axis]+500);
+	fprintf(gp,"set y2range[0:%d]\n",30);
 	fprintf(gp,"plot \"data.txt\" u 1:2 w l t \"chamber geom\"\n");
 	fprintf(gp,"replot \"data.txt\" u 1:3 w l t \"chamber wall temp\"\n");
 	fprintf(gp,"replot \"data.txt\" u 1:4 w l t \"channel wall temp\"\n");
@@ -183,7 +184,7 @@ void calc_fuel_consumption(void){
 
 // using bartz
 // needs to be modified for geometrical change in chamber
-void calc_gas_heat_transfer(double chamber_y,double tmp_visc_gas, double tmp_Cp, double tmp_prandtl_gas){
+void calc_gas_heat_transfer(int x,double tmp_visc_gas, double tmp_Cp, double tmp_prandtl_gas){
 	int j = 0;
 	double bartz[6];
 	hg = 1;
@@ -194,13 +195,12 @@ void calc_gas_heat_transfer(double chamber_y,double tmp_visc_gas, double tmp_Cp,
 				//visc changed from mmpoise to kgm/sec, Cp transforms to J
 	bartz[2] = pow(convert_to(Pa,PC) / CEA[nozzle_exit].Cstar,0.8);
 	bartz[3] = pow(Dt / (1.5 * Dt / 2),0.1);	//if the nozzle are conical
-	bartz[4] = pow(At / (chamber_y*chamber_y*M_PI),0.9); //change here for geometrical parameter.
+	bartz[4] = pow(At / (Chamber_y[x]*Chamber_y[x]*M_PI),0.9); //change here for geometrical parameter.
 
 	for(j = 0; j < 5; j++){
 		hg *= bartz[j];
 //		printf("bartz%d = %f\n",j,bartz[j]);
 	}
-
 	rg = 1 / hg;
 //	printf("Gas heat conductivity: = %f[W/m^2K]\n",hg);
 //	printf("Gas heat resistance:  = %f[m^2K/W]\n",rg);
@@ -251,7 +251,7 @@ void calc_fuel_heat_transfer(void){ //helical coil type
 	nyuf = VISC_F / DENSITY_FUEL / 1000;
 	Re = vf * convert_to(m,hydraulic_diam) / nyuf ;
 	Pr = VISC_F * CP_F / THRM_COND_FUEL;
-	Nu = 0.023 * pow(Re,0.8) * pow(Pr,0.6);
+	Nu = 0.0056 * pow(Re,0.95) * pow(Pr,0.4);
 
 	hf = Nu * THRM_COND_FUEL / convert_to(m,hydraulic_diam);
 	rf = 1 / hf; 
@@ -418,7 +418,7 @@ void calc_conical_nozzle(void){
 		Chamber_x[i] = i;
 		Chamber_y[i] = (y[2]-y[1])/(x[2]-x[1])*i + y[1] - (y[2]-y[1])/(x[2]-x[1])*x[1];
 	}
-	exit_axis = (int)x[2];
+	exit_axis = (int)x[2]-1;
 
 	fp = fopen("chamber.dxf","a");
 	dxf_arc(&fp,x[0],y[0]+Dt/2*1.5,Dt/2*1.5,270,270+exit_angle);
@@ -563,6 +563,42 @@ double CEA_coeff(int x, double chamber, double throat, double nozzle_exit){
 //	printf("coeff = %f\n",val);
 
 	return val;
+} 
+
+void boundary_layer(int x){
+	int error = 100;
+	double gamma,mach,rho,sigma,area,Tgas;
+	double tmp_hg;
+	double Tcw_old;
+
+//	if(x > throat_axis) return 0;
+
+	area = convert_to(m2,Dc/2*Dc/2*M_PI);
+	gamma = CEA_coeff(x,CEA[chamber].Gamma,CEA[throat].Gamma,CEA[nozzle_exit].Gamma);
+	mach = CEA_coeff(x,mt/CEA[chamber].Rho/area/CEA[chamber].Son,CEA[throat].Mach,CEA[nozzle_exit].Mach);
+	Tgas = CEA_coeff(x,CEA[chamber].Tc,CEA[throat].Tc,CEA[nozzle_exit].Tc);
+	
+	tmp_hg = hg;
+//	printf("x = %d, brg = %f ",x,1/hg);
+	while(error > 0.1){
+
+		Tcw_old = Tcw;
+		rt = 1/tmp_hg + rf + rm;
+		Q = (Tgas - 298) / rt;
+		Tcw = Tgas - Q * 1/tmp_hg;
+
+		sigma = pow((0.5*Tcw/Tgas*(1+0.5*(1+(gamma-1))*mach*mach)+0.5),0.68)
+			*pow((1+0.5*(1+(gamma-1))*mach*mach),0.12);
+		sigma = 1/sigma;
+		tmp_hg = hg*sigma;
+		error = abs(Tcw-Tcw_old)/Tcw;
+	}
+	
+	hg = tmp_hg;
+	rg = 1/hg;
+//	printf("arg = %f\n",1/hg);
+
+//	printf("x = %d, A = %f, Gamma = %f, rho = %f, mach = %f\n",x,area,gamma,rho,mach);
 }
 
 void plot_chamber(void){
@@ -588,3 +624,8 @@ void plot_chamber(void){
 	pclose(gp);
 }
 
+double rp1_visc(double temp){
+	double visc;
+
+	return visc;
+}

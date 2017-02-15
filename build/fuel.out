@@ -12,10 +12,10 @@
  prob
  rocket equilibrium frozen nfz=2
  o/f 2.300000
- p,bar 20.000000
- pip 20.000000
+ p,bar 40.000000
+ pip 40.000000
  reac
-  fuel Jet-A(L) wt%=100 t,k=298.15
+  fuel C10H21,n-decyl wt%=100 t,k=298.15
   oxid O2(L) wt%=100 t,k=90.17
  output transport
  output short
@@ -32,72 +32,73 @@
 
            COMPOSITION DURING EXPANSION FROM INFINITE AREA COMBUSTOR
 
- Pin =   290.1 PSIA
+ Pin =   580.2 PSIA
  CASE =                
 
              REACTANT                    WT FRACTION      ENERGY      TEMP
                                           (SEE NOTE)     KJ/KG-MOL      K  
- FUEL        Jet-A(L)                     1.0000000   -303403.000    298.150
+ FUEL        C10H21,n-decyl               1.0000000    -57740.001    298.150
  OXIDANT     O2(L)                        1.0000000    -12979.000     90.170
 
- O/F=    2.30000  %FUEL= 30.303030  R,EQ.RATIO= 1.475977  PHI,EQ.RATIO= 1.475977
+ O/F=    2.30000  %FUEL= 30.303030  R,EQ.RATIO= 1.501807  PHI,EQ.RATIO= 1.501807
 
                  CHAMBER   THROAT     EXIT
- Pinf/P            1.0000   1.7337   20.000
- P, BAR            20.000   11.536   1.0000
- T, K             3424.81  3245.86  2457.51
- RHO, KG/CU M    1.5547 0 9.5876-1 1.1426-1
- H, KJ/KG         -832.21 -1516.93 -4050.89
- U, KJ/KG        -2118.68 -2720.15 -4926.06
- G, KJ/KG        -41812.0 -40355.6 -33456.5
- S, KJ/(KG)(K)    11.9656  11.9656  11.9656
+ Pinf/P            1.0000   1.7371   40.000
+ P, BAR            40.000   23.027   1.0000
+ T, K             3560.46  3364.93  2268.52
+ RHO, KG/CU M    2.8998 0 1.7895 0 1.2030-1
+ H, KJ/KG         -406.55 -1142.38 -4447.25
+ U, KJ/KG        -1785.94 -2429.17 -5278.54
+ G, KJ/KG        -43385.2 -41760.7 -31830.8
+ S, KJ/(KG)(K)    12.0711  12.0711  12.0711
 
- M, (1/n)          22.135   22.430   23.347
- (dLV/dLP)t      -1.03278 -1.02602 -1.00329
- (dLV/dLT)p        1.5952   1.4989   1.0807
- Cp, KJ/(KG)(K)    6.1743   5.6511   2.7352
- GAMMAs            1.1390   1.1381   1.1748
- SON VEL,M/SEC     1210.5   1170.2   1014.0
- MACH NUMBER        0.000    1.000    2.502
+ M, (1/n)          21.461   21.742   22.690
+ (dLV/dLP)t      -1.03160 -1.02491 -1.00116
+ (dLV/dLT)p        1.5510   1.4602   1.0299
+ Cp, KJ/(KG)(K)    5.9018   5.4164   2.3437
+ GAMMAs            1.1446   1.1437   1.1972
+ SON VEL,M/SEC     1256.5   1213.1    997.6
+ MACH NUMBER        0.000    1.000    2.850
 
  TRANSPORT PROPERTIES (GASES ONLY)
    CONDUCTIVITY IN UNITS OF MILLIWATTS/(CM)(K)
 
- VISC,MILLIPOISE   1.0511   1.0128  0.83371
+ VISC,MILLIPOISE   1.0785   1.0369  0.78533
 
   WITH EQUILIBRIUM REACTIONS
 
- Cp, KJ/(KG)(K)    6.1743   5.6511   2.7352
- CONDUCTIVITY     14.5791  12.8742   4.7869
- PRANDTL NUMBER    0.4451   0.4446   0.4764
+ Cp, KJ/(KG)(K)    5.9018   5.4164   2.3437
+ CONDUCTIVITY     14.3305  12.6591   3.4491
+ PRANDTL NUMBER    0.4442   0.4436   0.5336
 
   WITH FROZEN REACTIONS
 
- Cp, KJ/(KG)(K)    2.0703   2.0602   1.9938
- CONDUCTIVITY      3.4862   3.3131   2.5562
- PRANDTL NUMBER    0.6242   0.6298   0.6503
+ Cp, KJ/(KG)(K)    2.1360   2.1248   2.0218
+ CONDUCTIVITY      3.7245   3.5297   2.4516
+ PRANDTL NUMBER    0.6185   0.6241   0.6476
 
  PERFORMANCE PARAMETERS
 
- Ae/At                      1.0000   3.8701
- CSTAR, M/SEC               1782.6   1782.6
- CF                         0.6565   1.4233
- Ivac, M/SEC                2198.4   2882.1
- Isp, M/SEC                 1170.2   2537.2
+ Ae/At                      1.0000   6.3480
+ CSTAR, M/SEC               1842.6   1842.6
+ CF                         0.6584   1.5428
+ Ivac, M/SEC                2273.9   3135.2
+ Isp, M/SEC                 1213.1   2842.8
 
 
  MOLE FRACTIONS
 
- *CO             3.6747-1 3.6491-1 3.5230-1
- *CO2            1.1359-1 1.2256-1 1.5514-1
- *H              3.8312-2 3.2278-2 7.5297-3
- HCO             1.4624-5 8.1966-6 3.9893-7
- HO2             2.6496-5 1.4138-5 1.1614-7
- *H2             1.1889-1 1.1882-1 1.3071-1
- H2O             3.0008-1 3.1404-1 3.4962-1
- *O              8.0253-3 5.4383-3 1.5077-4
- *OH             4.5760-2 3.6314-2 4.3810-3
- *O2             7.8189-3 5.6014-3 1.6597-4
+ *CO             3.6030-1 3.5844-1 3.4208-1
+ *CO2            1.0000-1 1.0791-1 1.4461-1
+ COOH            1.1145-5 6.4347-6 8.8858-8
+ *H              3.8971-2 3.2662-2 3.2140-3
+ HCO             2.6301-5 1.4695-5 2.2567-7
+ HO2             3.3345-5 1.7531-5 1.1789-8
+ *H2             1.3268-1 1.3273-1 1.5300-1
+ H2O             3.0813-1 3.2246-1 3.5578-1
+ *O              7.2968-3 4.8810-3 1.6547-5
+ *OH             4.6049-2 3.6294-2 1.2827-3
+ *O2             6.4977-3 4.5917-3 1.6110-5
 
   * THERMODYNAMIC PROPERTIES FITTED TO 20000.K
 
@@ -110,56 +111,57 @@
            THEORETICAL ROCKET PERFORMANCE ASSUMING FROZEN COMPOSITION
                                  AFTER POINT 2
 
- Pin =   290.1 PSIA
+ Pin =   580.2 PSIA
  CASE =                
 
              REACTANT                    WT FRACTION      ENERGY      TEMP
                                           (SEE NOTE)     KJ/KG-MOL      K  
- FUEL        Jet-A(L)                     1.0000000   -303403.000    298.150
+ FUEL        C10H21,n-decyl               1.0000000    -57740.001    298.150
  OXIDANT     O2(L)                        1.0000000    -12979.000     90.170
 
- O/F=    2.30000  %FUEL= 30.303030  R,EQ.RATIO= 1.475977  PHI,EQ.RATIO= 1.475977
+ O/F=    2.30000  %FUEL= 30.303030  R,EQ.RATIO= 1.501807  PHI,EQ.RATIO= 1.501807
 
                  CHAMBER   THROAT     EXIT
- Pinf/P            1.0000   1.7337   20.000
- P, BAR            20.000   11.536   1.0000
- T, K             3424.81  3245.86  2064.02
- RHO, KG/CU M    1.5547 0 9.5876-1 1.3070-1
- H, KJ/KG         -832.21 -1516.93 -3888.87
- U, KJ/KG        -2118.68 -2720.15 -4653.99
- G, KJ/KG        -41812.0 -40355.6 -28586.1
- S, KJ/(KG)(K)    11.9656  11.9656  11.9656
+ Pinf/P            1.0000   1.7371   40.000
+ P, BAR            40.000   23.027   1.0000
+ T, K             3560.46  3364.93  1871.86
+ RHO, KG/CU M    2.8998 0 1.7895 0 1.3970-1
+ H, KJ/KG         -406.55 -1142.38 -4208.56
+ U, KJ/KG        -1785.94 -2429.17 -4924.39
+ G, KJ/KG        -43385.2 -41760.7 -26803.9
+ S, KJ/(KG)(K)    12.0711  12.0711  12.0711
 
- M, (1/n)          22.135   22.430   22.430
- Cp, KJ/(KG)(K)    6.1743   5.6511   1.9367
- GAMMAs            1.1390   1.1381   1.2367
- SON VEL,M/SEC     1210.5   1170.2    972.7
- MACH NUMBER        0.000    1.000    2.542
+ M, (1/n)          21.461   21.742   21.742
+ Cp, KJ/(KG)(K)    5.9018   5.4164   1.9523
+ GAMMAs            1.1446   1.1437   1.2436
+ SON VEL,M/SEC     1256.5   1213.1    943.5
+ MACH NUMBER        0.000    1.000    2.923
 
  TRANSPORT PROPERTIES (GASES ONLY)
    CONDUCTIVITY IN UNITS OF MILLIWATTS/(CM)(K)
 
- VISC,MILLIPOISE   1.0511   1.0128  0.72972
+ VISC,MILLIPOISE   1.0785   1.0369  0.67724
 
   WITH FROZEN REACTIONS
 
- Cp, KJ/(KG)(K)    2.0703   2.0602   1.9367
- CONDUCTIVITY      3.4862   3.3131   2.1757
- PRANDTL NUMBER    0.6242   0.6298   0.6495
+ Cp, KJ/(KG)(K)    2.1360   2.1248   1.9523
+ CONDUCTIVITY      3.7245   3.5297   2.0402
+ PRANDTL NUMBER    0.6185   0.6241   0.6481
 
  PERFORMANCE PARAMETERS
 
- Ae/At                      1.0000   3.4719
- CSTAR, M/SEC               1782.6   1782.6
- CF                         0.6565   1.3870
- Ivac, M/SEC                2198.4   2782.0
- Isp, M/SEC                 1170.2   2472.5
+ Ae/At                      1.0000   5.6353
+ CSTAR, M/SEC               1842.6   1842.6
+ CF                         0.6584   1.4966
+ Ivac, M/SEC                2273.9   3017.1
+ Isp, M/SEC                 1213.1   2757.5
 
  MOLE FRACTIONS
 
- *CO             0.36491   *CO2            0.12256   *H              0.03228
- HO2             0.00001   *H2             0.11882   H2O             0.31404
- *O              0.00544   *OH             0.03631   *O2             0.00560
+ *CO             0.35844   *CO2            0.10791   *H              0.03266
+ HCO             0.00001   HO2             0.00002   *H2             0.13273
+ H2O             0.32246   *O              0.00488   *OH             0.03629
+ *O2             0.00459
 
   * THERMODYNAMIC PROPERTIES FITTED TO 20000.K
 
