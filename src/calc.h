@@ -27,5 +27,6 @@ void boundary_layer(int);
 void plot_chamber(void);
 double rp1_rho(double, double);
 double rp1_visc(double);
+double rp1_cp(double);
 
 #endif

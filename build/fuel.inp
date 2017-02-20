@@ -1,8 +1,8 @@
 prob
 rocket equilibrium frozen nfz=2
 o/f 2.300000
-p,bar 40.000000
-pip 40.000000
+p,bar 50.000000
+pip 50.000000
 reac
  fuel C10H21,n-decyl wt%=100 t,k=298.15
  oxid O2(L) wt%=100 t,k=90.17

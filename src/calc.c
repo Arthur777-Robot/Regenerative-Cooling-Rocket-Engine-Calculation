@@ -61,7 +61,7 @@ void calc_chamber_spec(void){
 				CEA[nozzle_exit].Tc);
 
 		calc_gas_heat_transfer(i,tmp_visc_gas,tmp_Cp,tmp_prandtl);
-		boundary_layer(i);
+//		boundary_layer(i);
 		calc_total_heat_transfer(i,tmp_gas_temp,total_heat,temp_chamber,
 				temp_channel);
 	}
@@ -204,9 +204,11 @@ void calc_gas_heat_transfer(int x,double tmp_visc_gas, double tmp_Cp, double tmp
 	rg = 1 / hg;
 //	printf("Gas heat conductivity: = %f[W/m^2K]\n",hg);
 //	printf("Gas heat resistance:  = %f[m^2K/W]\n",rg);
-	
 }
 
+void get_channel_diam(void){
+	double path_width,path_height,path_area,path_num,hydraulic_diam;
+}
 
 void calc_fuel_heat_transfer(void){ //helical coil type
 	double path_width,path_height,path_area,path_num,hydraulic_diam;
@@ -301,7 +303,6 @@ void calc_total_heat_transfer(int i,double chamber_temp,double *total_heat,doubl
 
 double calc_delta_fuel_temp(double chamber_y, double total_heat){
 	double A_ct;		//Chamber total area
-	double temp;
 
 	A_ct = 2 * M_PI * (chamber_y + Ct);
 
@@ -624,8 +625,43 @@ void plot_chamber(void){
 	pclose(gp);
 }
 
+double rp1_rho(double temp, double pressure){
+	double ref_density;
+	double b4,b5,b6,b7,b8,b9,b10,C,Tr,Pref,B;
+
+	b4 = 287.67129;		//kg/m3
+	b5 = 0.53365016;
+	b6 = 574.26284;		//K
+	b7 = 0.62886640;
+
+	ref_density = pow(b4*b5,(-(1+pow((1-temp/b6),b7))));
+
+	b8 = pow(79.63578*10,-3);		//MPa
+	b9 = 320.02684;				//MPa
+	b10 = -285.51955;			//MPa
+	C = 66.06879;
+
+	Tr = temp/273.15;
+	Pref = 0.083; 				//MPa CAUSION test facility is located high altitude region (1633m)
+	B = pow(b8+b9*Tr*b10*Tr,2);
+
+	return ref_density/(1-C*log((pressure+B)/(Pref+B)));		//kg/m3
+}
+
 double rp1_visc(double temp){
 	double visc;
+	double b14,b15,b16,b17,b18,Tr;
 
-	return visc;
+    b14 = 2.55848;
+	b15 = -3.505197;
+	b16 = -3.41204;
+	b17 = 2.15509;
+	b18 = -3.145151;
+	Tr = temp/273.15;
+
+	return exp(b14+b15/Tr+b16*log(Tr)+b17*pow(Tr,(b18)));		//mm2/s
+}
+
+double rp1_cp(double temp){
+
 }
